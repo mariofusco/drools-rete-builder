@@ -71,4 +71,25 @@ public class CompilerTest {
         ksession.insert(new Person("Mario", 40));
         ksession.fireAllRules();
     }
+
+    @Test
+    public void testAccumulate() {
+        String str =
+                "import " + Person.class.getCanonicalName() + ";" +
+                "rule R when\n" +
+                "  accumulate( Person( name.startsWith(\"M\"), $age : age ); $sum : sum( $age ) )\n" +
+                "then\n" +
+                "  System.out.println( $sum );\n" +
+                "end";
+
+        KieServices ks = KieServices.Factory.get();
+        KieFileSystem kfs = ks.newKieFileSystem().write( "src/main/resources/r1.drl", str );
+        ks.newKieBuilder( kfs ).buildAll().getResults();
+        KieSession ksession = ks.newKieContainer(ks.getRepository().getDefaultReleaseId()).newKieSession();
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Person("Edson", 35));
+        ksession.insert(new Person("Mario", 40));
+        ksession.fireAllRules();
+    }
 }

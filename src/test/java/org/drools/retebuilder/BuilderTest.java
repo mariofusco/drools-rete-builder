@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.drools.model.DSL.*;
+import static org.drools.model.functions.accumulate.Sum.sum;
 import static org.drools.model.impl.DataSourceImpl.sourceOf;
 
 public class BuilderTest {
@@ -96,6 +97,37 @@ public class BuilderTest {
                     ),
                 then(c -> c.on(oldest)
                            .execute(p -> System.out.println("Oldest person is " + p.getName())))
+        );
+
+        CanonicalKieBase kieBase = new CanonicalKieBase();
+        kieBase.addRule(rule);
+
+        KieSession ksession = kieBase.newKieSession();
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Person("Edson", 35));
+        ksession.insert(new Person("Mario", 40));
+
+        ksession.fireAllRules();
+    }
+
+    @Test
+    public void testAccumulate() {
+        DataSource persons = sourceOf(new Person("Mark", 37),
+                                      new Person("Edson", 35),
+                                      new Person("Mario", 40));
+
+        Variable<Integer> resultSum = bind(typeOf(Integer.class));
+
+        Rule rule = rule(
+                view(
+                        accumulate(p -> p.filter(typeOf(Person.class))
+                                         .with(person -> person.getName().startsWith("M"))
+                                         .from(persons),
+                                   sum(Person::getAge).as(resultSum))
+                    ),
+                then(c -> c.on(resultSum)
+                           .execute(System.out::println))
         );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
