@@ -49,4 +49,26 @@ public class CompilerTest {
         ksession.insert(new Person("Mario", 40));
         ksession.fireAllRules();
     }
+
+    @Test
+    public void testNot() {
+        String str =
+                "import " + Person.class.getCanonicalName() + ";" +
+                "rule R when\n" +
+                "  $p1 : Person()\n" +
+                "  not Person(age > $p1.age)\n" +
+                "then\n" +
+                "  System.out.println(\"Oldest person is \" + $p1.getName());\n" +
+                "end";
+
+        KieServices ks = KieServices.Factory.get();
+        KieFileSystem kfs = ks.newKieFileSystem().write( "src/main/resources/r1.drl", str );
+        ks.newKieBuilder( kfs ).buildAll();
+        KieSession ksession = ks.newKieContainer(ks.getRepository().getDefaultReleaseId()).newKieSession();
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Person("Edson", 35));
+        ksession.insert(new Person("Mario", 40));
+        ksession.fireAllRules();
+    }
 }

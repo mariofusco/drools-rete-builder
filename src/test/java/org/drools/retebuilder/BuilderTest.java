@@ -76,5 +76,38 @@ public class BuilderTest {
 
         ksession.fireAllRules();
     }
+
+    @Test
+    public void testNot() {
+        DataSource persons = sourceOf(new Person("Mark", 37),
+                                      new Person("Edson", 35),
+                                      new Person("Mario", 40));
+
+        List<String> list = new ArrayList<>();
+        Variable<Person> oldest = bind(typeOf(Person.class));
+
+        Rule rule = rule(
+                view(
+                        p -> p.filter(oldest)
+                              .from(persons),
+                        not(p -> p.using(oldest).filter(typeOf(Person.class))
+                                  .with(oldest, (p1, p2) -> p1.getAge() > p2.getAge())
+                                  .from(persons))
+                    ),
+                then(c -> c.on(oldest)
+                           .execute(p -> System.out.println("Oldest person is " + p.getName())))
+        );
+
+        CanonicalKieBase kieBase = new CanonicalKieBase();
+        kieBase.addRule(rule);
+
+        KieSession ksession = kieBase.newKieSession();
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Person("Edson", 35));
+        ksession.insert(new Person("Mario", 40));
+
+        ksession.fireAllRules();
+    }
 }
 

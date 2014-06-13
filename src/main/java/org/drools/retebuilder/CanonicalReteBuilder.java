@@ -5,8 +5,8 @@ import org.drools.core.common.BaseNode;
 import org.drools.core.common.BetaConstraints;
 import org.drools.core.common.RuleBasePartitionId;
 import org.drools.core.reteoo.AlphaNode;
+import org.drools.core.reteoo.BetaNode;
 import org.drools.core.reteoo.EntryPointNode;
-import org.drools.core.reteoo.JoinNode;
 import org.drools.core.reteoo.LeftInputAdapterNode;
 import org.drools.core.reteoo.LeftTupleSource;
 import org.drools.core.reteoo.NodeTypeEnums;
@@ -22,6 +22,7 @@ import org.drools.core.spi.ObjectType;
 import org.drools.model.Condition;
 import org.drools.model.Constraint;
 import org.drools.model.DataSource;
+import org.drools.model.ExistentialPattern;
 import org.drools.model.Pattern;
 import org.drools.model.Rule;
 import org.drools.retebuilder.adapters.RuleImplAdapter;
@@ -116,14 +117,14 @@ public class CanonicalReteBuilder {
         if (pattern.getConstraint().getType() == Constraint.Type.SINGLE) {
             ConstraintEvaluator constraintEvaluator = new ConstraintEvaluator(pattern);
             if (context.getTupleSource() == null) {
-                buildAlphaConstraint(constraintEvaluator, context);
+                buildAlphaConstraint(pattern, constraintEvaluator, context);
             } else {
-                buildBetaConstraint(constraintEvaluator, context);
+                buildBetaConstraint(pattern, constraintEvaluator, context);
             }
         }
     }
 
-    private void buildAlphaConstraint(ConstraintEvaluator constraintEvaluator, CanonicalBuildContext context) {
+    private void buildAlphaConstraint(Pattern pattern, ConstraintEvaluator constraintEvaluator, CanonicalBuildContext context) {
         LambdaConstraint alphaConstraint = new LambdaConstraint(constraintEvaluator);
 
         AlphaNode alpha = kieBase.getNodeFactory().buildAlphaNode( context.getNextId(),
@@ -134,7 +135,7 @@ public class CanonicalReteBuilder {
         context.setObjectSource( (ObjectSource) utils.attachNode( context, alpha ) );
     }
 
-    private void buildBetaConstraint(ConstraintEvaluator constraintEvaluator, CanonicalBuildContext context) {
+    private void buildBetaConstraint(Pattern pattern, ConstraintEvaluator constraintEvaluator, CanonicalBuildContext context) {
         List<BetaNodeFieldConstraint> betaConstraintsList = new LinkedList<BetaNodeFieldConstraint>();
         betaConstraintsList.add( new LambdaConstraint(constraintEvaluator) );
 
@@ -142,11 +143,31 @@ public class CanonicalReteBuilder {
                                                                           betaConstraintsList,
                                                                           false );
 
-        JoinNode beta = kieBase.getNodeFactory().buildJoinNode( context.getNextId(),
-                                                                context.getTupleSource(),
-                                                                context.getObjectSource(),
-                                                                betaConstraints,
-                                                                context );
+        BetaNode beta = null;
+        if (pattern instanceof ExistentialPattern) {
+            switch (((ExistentialPattern)pattern).getExistentialType()) {
+                case EXISTS:
+                    beta = kieBase.getNodeFactory().buildExistsNode( context.getNextId(),
+                                                                     context.getTupleSource(),
+                                                                     context.getObjectSource(),
+                                                                     betaConstraints,
+                                                                     context );
+                    break;
+                case NOT:
+                    beta = kieBase.getNodeFactory().buildNotNode( context.getNextId(),
+                                                                  context.getTupleSource(),
+                                                                  context.getObjectSource(),
+                                                                  betaConstraints,
+                                                                  context );
+                    break;
+            }
+        } else {
+            beta = kieBase.getNodeFactory().buildJoinNode( context.getNextId(),
+                                                           context.getTupleSource(),
+                                                           context.getObjectSource(),
+                                                           betaConstraints,
+                                                           context );
+        }
 
         context.setTupleSource( (LeftTupleSource) utils.attachNode( context, beta ) );
         context.setObjectSource( null );
