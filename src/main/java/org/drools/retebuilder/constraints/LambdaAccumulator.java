@@ -25,26 +25,21 @@ public class LambdaAccumulator implements Accumulator {
 
     @Override
     public Serializable createContext() {
-        throw new UnsupportedOperationException("org.drools.retebuilder.constraints.LambdaAccumulator.createContext -> TODO");
-
+        return accumulateFunction.init();
     }
 
     @Override
     public void init(Object workingMemoryContext, Object context, Tuple leftTuple, Declaration[] declarations, WorkingMemory workingMemory) throws Exception {
-        throw new UnsupportedOperationException("org.drools.retebuilder.constraints.LambdaAccumulator.init -> TODO");
-
     }
 
     @Override
     public void accumulate(Object workingMemoryContext, Object context, Tuple leftTuple, InternalFactHandle handle, Declaration[] declarations, Declaration[] innerDeclarations, WorkingMemory workingMemory) throws Exception {
-        throw new UnsupportedOperationException("org.drools.retebuilder.constraints.LambdaAccumulator.accumulate -> TODO");
-
+        accumulateFunction.action((Serializable)context, handle.getObject());
     }
 
     @Override
     public boolean supportsReverse() {
-        throw new UnsupportedOperationException("org.drools.retebuilder.constraints.LambdaAccumulator.supportsReverse -> TODO");
-
+        return true;
     }
 
     @Override
@@ -55,7 +50,6 @@ public class LambdaAccumulator implements Accumulator {
 
     @Override
     public Object getResult(Object workingMemoryContext, Object context, Tuple leftTuple, Declaration[] declarations, WorkingMemory workingMemory) throws Exception {
-        throw new UnsupportedOperationException("org.drools.retebuilder.constraints.LambdaAccumulator.getResult -> TODO");
-
+        return accumulateFunction.result((Serializable)context);
     }
 }

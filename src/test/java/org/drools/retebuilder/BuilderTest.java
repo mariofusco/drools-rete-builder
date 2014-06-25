@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.drools.model.DSL.*;
+import static org.drools.model.functions.accumulate.Average.avg;
 import static org.drools.model.functions.accumulate.Sum.sum;
 import static org.drools.model.impl.DataSourceImpl.sourceOf;
+import static org.junit.Assert.assertEquals;
 
 public class BuilderTest {
 
@@ -21,6 +23,8 @@ public class BuilderTest {
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
+        Result result = new Result();
+
         Variable<Person> mark = bind(typeOf(Person.class));
 
         Rule rule = rule(
@@ -28,7 +32,7 @@ public class BuilderTest {
                            .with(person -> person.getName().equals("Mark"))
                            .from(persons)),
                 then(c -> c.on(mark)
-                           .execute(System.out::println))
+                           .execute(p -> result.value = p.getName()))
         );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
@@ -41,6 +45,7 @@ public class BuilderTest {
         ksession.insert(new Person("Mario", 40));
 
         ksession.fireAllRules();
+        assertEquals("Mark", result.value);
     }
 
     @Test
@@ -48,6 +53,8 @@ public class BuilderTest {
         DataSource persons = sourceOf(new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
+
+        Result result = new Result();
 
         List<String> list = new ArrayList<>();
         Variable<Person> mark = bind(typeOf(Person.class));
@@ -63,7 +70,7 @@ public class BuilderTest {
                               .from(persons)
                     ),
                 then(c -> c.on(older, mark)
-                           .execute((p1, p2) -> System.out.println(p1.getName() + " is older than " + p2.getName())))
+                           .execute((p1, p2) -> result.value = p1.getName() + " is older than " + p2.getName()))
         );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
@@ -76,6 +83,7 @@ public class BuilderTest {
         ksession.insert(new Person("Mario", 40));
 
         ksession.fireAllRules();
+        assertEquals("Mario is older than Mark", result.value);
     }
 
     @Test
@@ -83,6 +91,8 @@ public class BuilderTest {
         DataSource persons = sourceOf(new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
+
+        Result result = new Result();
 
         List<String> list = new ArrayList<>();
         Variable<Person> oldest = bind(typeOf(Person.class));
@@ -96,7 +106,7 @@ public class BuilderTest {
                                   .from(persons))
                     ),
                 then(c -> c.on(oldest)
-                           .execute(p -> System.out.println("Oldest person is " + p.getName())))
+                           .execute(p -> result.value = "Oldest person is " + p.getName()))
         );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
@@ -109,6 +119,7 @@ public class BuilderTest {
         ksession.insert(new Person("Mario", 40));
 
         ksession.fireAllRules();
+        assertEquals("Oldest person is Mario", result.value);
     }
 
     @Test
@@ -117,17 +128,21 @@ public class BuilderTest {
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
+        Result result = new Result();
+
         Variable<Integer> resultSum = bind(typeOf(Integer.class));
+        Variable<Double> resultAvg = bind(typeOf(Double.class));
 
         Rule rule = rule(
                 view(
                         accumulate(p -> p.filter(typeOf(Person.class))
                                          .with(person -> person.getName().startsWith("M"))
                                          .from(persons),
-                                   sum(Person::getAge).as(resultSum))
+                                   sum(Person::getAge).as(resultSum),
+                                   avg(Person::getAge).as(resultAvg))
                     ),
-                then(c -> c.on(resultSum)
-                           .execute(System.out::println))
+                then(c -> c.on(resultSum, resultAvg)
+                           .execute((sum, avg) -> result.value = "total = " + sum + "; average = " + avg))
         );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
@@ -140,6 +155,11 @@ public class BuilderTest {
         ksession.insert(new Person("Mario", 40));
 
         ksession.fireAllRules();
+        assertEquals("total = 77; average = 38.5", result.value);
+    }
+
+    private static class Result {
+        Object value;
     }
 }
 

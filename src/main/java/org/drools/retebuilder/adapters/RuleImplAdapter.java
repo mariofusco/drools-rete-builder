@@ -7,25 +7,24 @@ import org.drools.core.spi.Consequence;
 import org.drools.core.spi.KnowledgeHelper;
 import org.drools.model.Rule;
 import org.drools.model.Variable;
+import org.drools.retebuilder.ArgumentMapper;
 import org.drools.retebuilder.CanonicalBuildContext;
-
-import java.util.List;
 
 public class RuleImplAdapter extends RuleImpl {
     private final Consequence consequence;
 
     public RuleImplAdapter(Rule rule, CanonicalBuildContext context) {
         super("");
-        int[] argsPos = findVarPosInPattern(rule.getConsequence().getDeclarations(), context.getBoundVariables());
-        this.consequence = new ConsequenceAdapter(rule.getConsequence(), argsPos);
+        ArgumentMapper[] args = findVarPosInPattern(rule.getConsequence().getDeclarations(), context);
+        this.consequence = new ConsequenceAdapter(rule.getConsequence(), args);
     }
 
-    private int[] findVarPosInPattern(Variable[] consequenceDeclarations, List<Variable> boundVariables) {
-        int[] pos = new int[consequenceDeclarations.length];
-        for (int i = 0; i < pos.length; i++) {
-            pos[i] = boundVariables.indexOf(consequenceDeclarations[i]);
+    private ArgumentMapper[] findVarPosInPattern(Variable[] consequenceDeclarations, CanonicalBuildContext context) {
+        ArgumentMapper[] args = new ArgumentMapper[consequenceDeclarations.length];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = context.getVariableMapper(consequenceDeclarations[i]);
         }
-        return pos;
+        return args;
     }
 
 
@@ -37,11 +36,11 @@ public class RuleImplAdapter extends RuleImpl {
     public static class ConsequenceAdapter implements Consequence {
 
         private final org.drools.model.Consequence consequence;
-        private final int[] argsPos;
+        private final ArgumentMapper[] args;
 
-        public ConsequenceAdapter(org.drools.model.Consequence consequence, int[] argsPos) {
+        public ConsequenceAdapter(org.drools.model.Consequence consequence, ArgumentMapper[] args) {
             this.consequence = consequence;
-            this.argsPos = argsPos;
+            this.args = args;
         }
 
         @Override
@@ -52,9 +51,9 @@ public class RuleImplAdapter extends RuleImpl {
         @Override
         public void evaluate(KnowledgeHelper knowledgeHelper, WorkingMemory workingMemory) throws Exception {
             InternalFactHandle[] factHandles = knowledgeHelper.getTuple().toFactHandles();
-            Object[] facts = new Object[argsPos.length];
-            for (int i = 0; i < argsPos.length; i++) {
-                facts[i] = factHandles[argsPos[i]].getObject();
+            Object[] facts = new Object[args.length];
+            for (int i = 0; i < args.length; i++) {
+                facts[i] = args[i].getFact(factHandles);
             }
             consequence.getBlock().execute(facts);
         }

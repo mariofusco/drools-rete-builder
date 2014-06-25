@@ -18,7 +18,6 @@ import org.drools.core.reteoo.ReteooBuilder;
 import org.drools.core.reteoo.TerminalNode;
 import org.drools.core.reteoo.builder.BuildUtils;
 import org.drools.core.rule.Accumulate;
-import org.drools.core.rule.Declaration;
 import org.drools.core.rule.EntryPointId;
 import org.drools.core.rule.GroupElement;
 import org.drools.core.spi.Accumulator;
@@ -32,6 +31,7 @@ import org.drools.model.DataSource;
 import org.drools.model.ExistentialPattern;
 import org.drools.model.Pattern;
 import org.drools.model.Rule;
+import org.drools.retebuilder.adapters.AccumulateAdapter;
 import org.drools.retebuilder.adapters.RuleImplAdapter;
 import org.drools.retebuilder.constraints.ConstraintEvaluator;
 import org.drools.retebuilder.constraints.LambdaAccumulator;
@@ -95,9 +95,9 @@ public class CanonicalReteBuilder {
         initConstraint(pattern, context);
 
         context.setObjectSource(getEntryPoint(context, pattern.getDataSource()));
-        context.addBoundVariable(pattern.getVariable());
+        context.addBoundVariables(pattern);
 
-        Class<?> patternClass = pattern.getVariable().getType().asClass();
+        Class<?> patternClass = pattern.getPatternVariable().getType().asClass();
         createObjectTypeNode(context, patternClass);
 
         buildConstraint(pattern, context);
@@ -143,7 +143,7 @@ public class CanonicalReteBuilder {
             accumulators[i] = new LambdaAccumulator(pattern.getFunctions()[i]);
         }
 
-        Accumulate accumulate = new Accumulate(null, new Declaration[0], accumulators, true);
+        Accumulate accumulate = new AccumulateAdapter(accumulators);
 
         AccumulateNode accNode = kieBase.getNodeFactory().buildAccumulateNode(context.getNextId(),
                                                                               context.getTupleSource(),

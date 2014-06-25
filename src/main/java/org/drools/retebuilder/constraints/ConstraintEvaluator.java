@@ -27,7 +27,7 @@ public class ConstraintEvaluator {
     }
 
     private int findVarPosInPattern(Pattern pattern, Variable var) {
-        if (var.equals(pattern.getVariable())) {
+        if (var.equals(pattern.getPatternVariable())) {
             return -1;
         }
         for (int i = 0; i < pattern.getInputVariables().length; i++) {
