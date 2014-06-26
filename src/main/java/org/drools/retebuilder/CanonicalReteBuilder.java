@@ -116,7 +116,7 @@ public class CanonicalReteBuilder {
     private void buildConstraint(Pattern pattern, CanonicalBuildContext context) {
         if (pattern.getConstraint().getType() == Constraint.Type.SINGLE) {
             ConstraintEvaluator constraintEvaluator = new ConstraintEvaluator(pattern);
-            if (pattern.getInputVariables() == null) {
+            if (pattern.getInputVariables().length < 2) {
                 buildAlphaConstraint(pattern, constraintEvaluator, context);
             } else {
                 buildBetaConstraint(pattern, constraintEvaluator, context);

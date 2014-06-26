@@ -32,7 +32,9 @@ public class ConstraintEvaluator {
         }
         for (int i = 0; i < pattern.getInputVariables().length; i++) {
             if (var.equals(pattern.getInputVariables()[i])) {
-                return i;
+                // TODO FIXME
+                // how could I determine the position of this variable inside the left tuple?
+                return 0;
             }
         }
         throw new RuntimeException("Unknown Variable: " + var);

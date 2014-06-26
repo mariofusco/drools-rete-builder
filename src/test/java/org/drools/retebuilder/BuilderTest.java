@@ -65,7 +65,7 @@ public class BuilderTest {
                         p -> p.filter(mark)
                               .with(person -> person.getName().equals("Mark"))
                               .from(persons),
-                        p -> p.using(mark).filter(older)
+                        p -> p.filter(older)
                               .with(older, mark, (p1, p2) -> p1.getAge() > p2.getAge())
                               .from(persons)
                     ),
@@ -101,7 +101,7 @@ public class BuilderTest {
                 view(
                         p -> p.filter(oldest)
                               .from(persons),
-                        not(p -> p.using(oldest).filter(typeOf(Person.class))
+                        not(p -> p.filter(typeOf(Person.class))
                                   .with(oldest, (p1, p2) -> p1.getAge() > p2.getAge())
                                   .from(persons))
                     ),
