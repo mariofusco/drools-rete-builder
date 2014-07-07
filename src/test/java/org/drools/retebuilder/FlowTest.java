@@ -10,12 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.drools.model.DSL.*;
-import static org.drools.model.functions.accumulate.Average.avg;
-import static org.drools.model.functions.accumulate.Sum.sum;
+import static org.drools.model.flow.FlowDSL.*;
 import static org.drools.model.impl.DataSourceImpl.sourceOf;
 import static org.junit.Assert.assertEquals;
 
-public class BuilderTest {
+public class FlowTest {
 
     @Test
     public void testAlpha() {
@@ -25,14 +24,16 @@ public class BuilderTest {
 
         Result result = new Result();
 
-        Variable<Person> mark = bind(typeOf(Person.class));
+        Variable<Person> markV = bind(typeOf(Person.class));
 
         Rule rule = rule(
-                view(p -> p.filter(mark)
-                           .with(person -> person.getName().equals("Mark"))
-                           .from(persons)),
-                then(c -> c.on(mark)
-                           .execute(p -> result.value = p.getName()))
+                view(
+                        input(markV, () -> persons),
+                        expr(markV, mark -> mark.getName().equals("Mark"))
+                    ),
+                then(c -> c.on(markV)
+                           .execute(p -> result.value = p.getName())
+                    )
         );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
@@ -57,22 +58,20 @@ public class BuilderTest {
         Result result = new Result();
 
         List<String> list = new ArrayList<>();
-        Variable<Person> mark = bind(typeOf(Person.class));
-        Variable<Person> older = bind(typeOf(Person.class));
+        Variable<Person> markV = bind(typeOf(Person.class));
+        Variable<Person> olderV = bind(typeOf(Person.class));
 
         Rule rule = rule(
                 view(
-                        p -> p.filter(mark)
-                              .with(person -> person.getName().equals("Mark"))
-                              .from(persons),
-                        p -> p.filter(older)
-                              .with(person -> !person.getName().equals("Mark"))
-                              .and(older, mark, (p1, p2) -> p1.getAge() > p2.getAge())
-                              .from(persons)
+                        input(markV, () -> persons),
+                        input(olderV, () -> persons),
+                        expr(markV, mark -> mark.getName().equals("Mark")),
+                        expr(olderV, older -> !older.getName().equals("Mark")),
+                        expr(olderV, markV, (older, mark) -> older.getAge() > mark.getAge())
                     ),
-                then(c -> c.on(older, mark)
+                then(c -> c.on(olderV, markV)
                            .execute((p1, p2) -> result.value = p1.getName() + " is older than " + p2.getName()))
-        );
+                    );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
         kieBase.addRule(rule);
@@ -96,19 +95,19 @@ public class BuilderTest {
         Result result = new Result();
 
         List<String> list = new ArrayList<>();
-        Variable<Person> oldest = bind(typeOf(Person.class));
+        Variable<Person> oldestV = bind(typeOf(Person.class));
+        Variable<Person> otherV = bind(typeOf(Person.class));
 
         Rule rule = rule(
                 view(
-                        p -> p.filter(oldest)
-                              .from(persons),
-                        not(p -> p.filter(typeOf(Person.class))
-                                  .with(oldest, (p1, p2) -> p1.getAge() > p2.getAge())
-                                  .from(persons))
+                        input(oldestV, () -> persons),
+                        input(otherV, () -> persons),
+                        expr(oldestV, p -> true),
+                        not(otherV, oldestV, (p1, p2) -> p1.getAge() > p2.getAge())
                     ),
-                then(c -> c.on(oldest)
+                then(c -> c.on(oldestV)
                            .execute(p -> result.value = "Oldest person is " + p.getName()))
-        );
+                    );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
         kieBase.addRule(rule);
@@ -123,44 +122,7 @@ public class BuilderTest {
         assertEquals("Oldest person is Mario", result.value);
     }
 
-    @Test
-    public void testAccumulate() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
-                                      new Person("Edson", 35),
-                                      new Person("Mario", 40));
-
-        Result result = new Result();
-
-        Variable<Integer> resultSum = bind(typeOf(Integer.class));
-        Variable<Double> resultAvg = bind(typeOf(Double.class));
-
-        Rule rule = rule(
-                view(
-                        accumulate(p -> p.filter(typeOf(Person.class))
-                                         .with(person -> person.getName().startsWith("M"))
-                                         .from(persons),
-                                   sum(Person::getAge).as(resultSum),
-                                   avg(Person::getAge).as(resultAvg))
-                    ),
-                then(c -> c.on(resultSum, resultAvg)
-                           .execute((sum, avg) -> result.value = "total = " + sum + "; average = " + avg))
-        );
-
-        CanonicalKieBase kieBase = new CanonicalKieBase();
-        kieBase.addRule(rule);
-
-        KieSession ksession = kieBase.newKieSession();
-
-        ksession.insert(new Person("Mark", 37));
-        ksession.insert(new Person("Edson", 35));
-        ksession.insert(new Person("Mario", 40));
-
-        ksession.fireAllRules();
-        assertEquals("total = 77; average = 38.5", result.value);
-    }
-
     private static class Result {
         Object value;
     }
 }
-

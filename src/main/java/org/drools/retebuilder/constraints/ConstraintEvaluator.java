@@ -12,8 +12,7 @@ public class ConstraintEvaluator {
     private final MultiValuePredicate predicate;
     private final int[] argsPos;
 
-    public ConstraintEvaluator(Pattern pattern) {
-        SingleConstraint constraint = (SingleConstraint) pattern.getConstraint();
+    public ConstraintEvaluator(Pattern pattern, SingleConstraint constraint) {
         this.predicate = constraint.getPredicate();
         this.argsPos = findArgsPos(pattern, constraint);
     }

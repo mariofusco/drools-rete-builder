@@ -31,6 +31,7 @@ import org.drools.model.DataSource;
 import org.drools.model.ExistentialPattern;
 import org.drools.model.Pattern;
 import org.drools.model.Rule;
+import org.drools.model.SingleConstraint;
 import org.drools.retebuilder.adapters.AccumulateAdapter;
 import org.drools.retebuilder.adapters.RuleImplAdapter;
 import org.drools.retebuilder.constraints.ConstraintEvaluator;
@@ -100,7 +101,7 @@ public class CanonicalReteBuilder {
         Class<?> patternClass = pattern.getPatternVariable().getType().asClass();
         createObjectTypeNode(context, patternClass);
 
-        buildConstraint(pattern, context);
+        buildConstraints(pattern, context);
         context.incrementCurrentPatternOffset();
 
         createLeftInputAdapterNode(context);
@@ -113,17 +114,26 @@ public class CanonicalReteBuilder {
         }
     }
 
-    private void buildConstraint(Pattern pattern, CanonicalBuildContext context) {
-        if (pattern.getConstraint().getType() == Constraint.Type.SINGLE) {
-            ConstraintEvaluator constraintEvaluator = new ConstraintEvaluator(pattern);
-            if (pattern.getInputVariables().length < 2) {
+    private void buildConstraints(Pattern pattern, CanonicalBuildContext context) {
+        buildConstraint(pattern, pattern.getConstraint(), context);
+        if (pattern instanceof AccumulatePattern) {
+            buildAccumulate((AccumulatePattern) pattern, context);
+        }
+    }
+
+    private void buildConstraint(Pattern pattern, Constraint constraint, CanonicalBuildContext context) {
+        if (constraint.getType() == Constraint.Type.SINGLE) {
+            SingleConstraint singleConstraint = (SingleConstraint) constraint;
+            ConstraintEvaluator constraintEvaluator = new ConstraintEvaluator(pattern, singleConstraint);
+            if (singleConstraint.getVariables().length < 2) {
                 buildAlphaConstraint(pattern, constraintEvaluator, context);
             } else {
                 buildBetaConstraint(pattern, constraintEvaluator, context);
             }
-        }
-        if (pattern instanceof AccumulatePattern) {
-            buildAccumulate((AccumulatePattern)pattern, context);
+        } else if (pattern.getConstraint().getType() == Constraint.Type.AND) {
+            for (Constraint child : constraint.getChildren()) {
+                buildConstraint(pattern, child, context);
+            }
         }
     }
 
