@@ -5,11 +5,11 @@ import org.drools.core.reteoo.LeftTuple;
 import org.drools.model.Pattern;
 import org.drools.model.SingleConstraint;
 import org.drools.model.Variable;
-import org.drools.model.functions.MultiValuePredicate;
+import org.drools.model.functions.PredicateN;
 
 public class ConstraintEvaluator {
 
-    private final MultiValuePredicate predicate;
+    private final PredicateN predicate;
     private final int[] argsPos;
 
     public ConstraintEvaluator(Pattern pattern, SingleConstraint constraint) {

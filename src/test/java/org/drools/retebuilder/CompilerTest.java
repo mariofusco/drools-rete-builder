@@ -17,10 +17,7 @@ public class CompilerTest {
                 "  System.out.println($p);\n" +
                 "end";
 
-        KieServices ks = KieServices.Factory.get();
-        KieFileSystem kfs = ks.newKieFileSystem().write( "src/main/resources/r1.drl", str );
-        ks.newKieBuilder( kfs ).buildAll();
-        KieSession ksession = ks.newKieContainer(ks.getRepository().getDefaultReleaseId()).newKieSession();
+        KieSession ksession = getKieSession(str);
 
         ksession.insert(new Person("Mark", 37));
         ksession.insert(new Person("Edson", 35));
@@ -39,10 +36,7 @@ public class CompilerTest {
                 "  System.out.println($p2.getName() + \" is older than \" + $p1.getName());\n" +
                 "end";
 
-        KieServices ks = KieServices.Factory.get();
-        KieFileSystem kfs = ks.newKieFileSystem().write( "src/main/resources/r1.drl", str );
-        ks.newKieBuilder( kfs ).buildAll();
-        KieSession ksession = ks.newKieContainer(ks.getRepository().getDefaultReleaseId()).newKieSession();
+        KieSession ksession = getKieSession(str);
 
         ksession.insert(new Person("Mark", 37));
         ksession.insert(new Person("Edson", 35));
@@ -61,10 +55,7 @@ public class CompilerTest {
                 "  System.out.println(\"Oldest person is \" + $p1.getName());\n" +
                 "end";
 
-        KieServices ks = KieServices.Factory.get();
-        KieFileSystem kfs = ks.newKieFileSystem().write( "src/main/resources/r1.drl", str );
-        ks.newKieBuilder( kfs ).buildAll();
-        KieSession ksession = ks.newKieContainer(ks.getRepository().getDefaultReleaseId()).newKieSession();
+        KieSession ksession = getKieSession(str);
 
         ksession.insert(new Person("Mark", 37));
         ksession.insert(new Person("Edson", 35));
@@ -91,5 +82,12 @@ public class CompilerTest {
         ksession.insert(new Person("Edson", 35));
         ksession.insert(new Person("Mario", 40));
         ksession.fireAllRules();
+    }
+
+    private KieSession getKieSession(String str) {
+        KieServices ks = KieServices.Factory.get();
+        KieFileSystem kfs = ks.newKieFileSystem().write( "src/main/resources/r1.drl", str );
+        ks.newKieBuilder( kfs ).buildAll();
+        return ks.newKieContainer(ks.getRepository().getDefaultReleaseId()).newKieSession();
     }
 }

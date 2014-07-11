@@ -53,5 +53,9 @@ public class CanonicalBuildContext extends BuildContext {
             Object fact = factHandles[factHandlePos].getObject();
             return fact instanceof Object[] ? ((Object[])fact)[declarationPos] : fact;
         }
+
+        public InternalFactHandle getFactHandle(InternalFactHandle[] factHandles) {
+            return factHandles[factHandlePos];
+        }
     }
 }
