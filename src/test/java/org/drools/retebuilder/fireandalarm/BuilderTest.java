@@ -25,74 +25,65 @@ public class BuilderTest {
         Variable<Sprinkler> sprinkler = bind(typeOf(Sprinkler.class));
         Variable<Alarm> alarm = bind(typeOf(Alarm.class));
 
-        Rule when_there_is_a_fire_turn_on_the_sprinkler = rule(
-                view(
+        Rule r1 = rule("When there is a fire turn on the sprinkler")
+                .when(
                         p -> p.filter(fire),
                         p -> p.filter(sprinkler)
                               .with(s -> !s.isOn())
                               .and(sprinkler, fire, (s, f) -> s.getRoom().equals(f.getRoom()))
-                    ),
-                then(c -> c.on(sprinkler)
+                    )
+                .then(c -> c.on(sprinkler)
                            .execute(s -> {
                                System.out.println("Turn on the sprinkler for room " + s.getRoom().getName());
                                s.setOn(true);
                            })
                            .update(sprinkler, "on")
-                    )
-        );
+                    );
 
-        Rule raise_the_alarm_when_we_have_one_or_more_fires = rule(
-                view(
+        Rule r2 = rule("Raise the alarm when we have one or more fires")
+                .when(
                         exists(p -> p.filter(fire))
-                    ),
-                then(c -> c.execute(() -> System.out.println("Raise the alarm"))
-                           .insert(() -> new Alarm())
                     )
-        );
+                .then(c -> c.execute(() -> System.out.println("Raise the alarm"))
+                           .insert(() -> new Alarm())
+                    );
 
-        Rule when_the_fire_is_gone_turn_off_the_sprinkler = rule(
-                view(
+        Rule r3 = rule("When the fire is gone turn off the sprinkler")
+                .when(
                         p -> p.filter(sprinkler)
                               .with(s -> s.isOn()),
                         not(p -> p.filter(fire)
                                   .with(sprinkler, (f, s) -> f.getRoom().equals(s.getRoom()))
                            )
-                    ),
-                then(c -> c.on(sprinkler)
+                    )
+                .then(c -> c.on(sprinkler)
                            .execute(s -> {
                                System.out.println("Turn off the sprinkler for room " + s.getRoom().getName());
                                s.setOn(false);
                            })
                            .update(sprinkler, "on")
-                    )
-        );
+                    );
 
-        Rule lower_the_alarm_when_all_the_fires_have_gone = rule(
-                view(
+        Rule r4 = rule("Lower the alarm when all the fires have gone")
+                .when(
                        p -> p.filter(alarm),
                        not(p -> p.filter(fire))
-                    ),
-                then(c -> c.execute(() -> System.out.println("Lower the alarm"))
-                           .delete(alarm)
                     )
-        );
+                .then(c -> c.execute(() -> System.out.println("Lower the alarm"))
+                           .delete(alarm)
+                    );
 
-        Rule status_output_when_things_are_ok = rule(
-                view(
+        Rule r5 = rule("Status output when things are ok")
+                .when(
                        not(p -> p.filter(alarm)),
                        not(p -> p.filter(sprinkler).with(Sprinkler::isOn))
-                    ),
-                then(
-                        c -> c.execute(() -> System.out.println("Everything is ok"))
                     )
-        );
+                .then(
+                        c -> c.execute(() -> System.out.println("Everything is ok"))
+                    );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
-        kieBase.addRule(when_there_is_a_fire_turn_on_the_sprinkler);
-        kieBase.addRule(raise_the_alarm_when_we_have_one_or_more_fires);
-        kieBase.addRule(when_the_fire_is_gone_turn_off_the_sprinkler);
-        kieBase.addRule(lower_the_alarm_when_all_the_fires_have_gone);
-        kieBase.addRule(status_output_when_things_are_ok);
+        kieBase.addRules(r1, r2, r3, r4, r5);
 
         dumpRete(kieBase);
 

@@ -64,8 +64,10 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
         return this.reteooBuilder;
     }
 
-    public void addRule(Rule rule) {
-        reteBuilder.addRule(rule);
+    public void addRules(Rule... rules) {
+        for (Rule rule : rules) {
+            reteBuilder.addRule(rule);
+        }
     }
 
     public NodeFactory getNodeFactory() {

@@ -27,16 +27,15 @@ public class BuilderTest {
 
         Variable<Person> mark = bind(typeOf(Person.class));
 
-        Rule rule = rule(
-                view(p -> p.filter(mark)
+        Rule rule = rule("alpha")
+                .when(p -> p.filter(mark)
                            .with(person -> person.getName().equals("Mark"))
-                           .from(persons)),
-                then(c -> c.on(mark)
-                           .execute(p -> result.value = p.getName()))
-        );
+                           .from(persons))
+                .then(c -> c.on(mark)
+                           .execute(p -> result.value = p.getName()));
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
-        kieBase.addRule(rule);
+        kieBase.addRules(rule);
 
         KieSession ksession = kieBase.newKieSession();
 
@@ -60,8 +59,8 @@ public class BuilderTest {
         Variable<Person> mark = bind(typeOf(Person.class));
         Variable<Person> older = bind(typeOf(Person.class));
 
-        Rule rule = rule(
-                view(
+        Rule rule = rule("beta")
+                .when(
                         p -> p.filter(mark)
                               .with(person -> person.getName().equals("Mark"))
                               .from(persons),
@@ -69,13 +68,12 @@ public class BuilderTest {
                               .with(person -> !person.getName().equals("Mark"))
                               .and(older, mark, (p1, p2) -> p1.getAge() > p2.getAge())
                               .from(persons)
-                    ),
-                then(c -> c.on(older, mark)
-                           .execute((p1, p2) -> result.value = p1.getName() + " is older than " + p2.getName()))
-        );
+                    )
+                .then(c -> c.on(older, mark)
+                           .execute((p1, p2) -> result.value = p1.getName() + " is older than " + p2.getName()));
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
-        kieBase.addRule(rule);
+        kieBase.addRules(rule);
 
         KieSession ksession = kieBase.newKieSession();
 
@@ -98,20 +96,19 @@ public class BuilderTest {
         List<String> list = new ArrayList<>();
         Variable<Person> oldest = bind(typeOf(Person.class));
 
-        Rule rule = rule(
-                view(
+        Rule rule = rule("not")
+                .when(
                         p -> p.filter(oldest)
                               .from(persons),
                         not(p -> p.filter(typeOf(Person.class))
                                   .with(oldest, (p1, p2) -> p1.getAge() > p2.getAge())
                                   .from(persons))
-                    ),
-                then(c -> c.on(oldest)
-                           .execute(p -> result.value = "Oldest person is " + p.getName()))
-        );
+                    )
+                .then(c -> c.on(oldest)
+                           .execute(p -> result.value = "Oldest person is " + p.getName()));
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
-        kieBase.addRule(rule);
+        kieBase.addRules(rule);
 
         KieSession ksession = kieBase.newKieSession();
 
@@ -134,20 +131,19 @@ public class BuilderTest {
         Variable<Integer> resultSum = bind(typeOf(Integer.class));
         Variable<Double> resultAvg = bind(typeOf(Double.class));
 
-        Rule rule = rule(
-                view(
+        Rule rule = rule("accumulate")
+                .when(
                         accumulate(p -> p.filter(typeOf(Person.class))
                                          .with(person -> person.getName().startsWith("M"))
                                          .from(persons),
                                    sum(Person::getAge).as(resultSum),
                                    avg(Person::getAge).as(resultAvg))
-                    ),
-                then(c -> c.on(resultSum, resultAvg)
-                           .execute((sum, avg) -> result.value = "total = " + sum + "; average = " + avg))
-        );
+                    )
+                .then(c -> c.on(resultSum, resultAvg)
+                           .execute((sum, avg) -> result.value = "total = " + sum + "; average = " + avg));
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
-        kieBase.addRule(rule);
+        kieBase.addRules(rule);
 
         KieSession ksession = kieBase.newKieSession();
 

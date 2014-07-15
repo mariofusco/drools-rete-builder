@@ -26,18 +26,16 @@ public class FlowTest {
 
         Variable<Person> markV = bind(typeOf(Person.class));
 
-        Rule rule = rule(
-                view(
+        Rule rule = rule("alpha")
+                .view(
                         input(markV, () -> persons),
                         expr(markV, mark -> mark.getName().equals("Mark"))
-                    ),
-                then(c -> c.on(markV)
-                           .execute(p -> result.value = p.getName())
                     )
-        );
+                .then(c -> c.on(markV)
+                           .execute(p -> result.value = p.getName()));
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
-        kieBase.addRule(rule);
+        kieBase.addRules(rule);
 
         KieSession ksession = kieBase.newKieSession();
 
@@ -61,20 +59,19 @@ public class FlowTest {
         Variable<Person> markV = bind(typeOf(Person.class));
         Variable<Person> olderV = bind(typeOf(Person.class));
 
-        Rule rule = rule(
-                view(
+        Rule rule = rule("beta")
+                .view(
                         input(markV, () -> persons),
                         input(olderV, () -> persons),
                         expr(markV, mark -> mark.getName().equals("Mark")),
                         expr(olderV, older -> !older.getName().equals("Mark")),
                         expr(olderV, markV, (older, mark) -> older.getAge() > mark.getAge())
-                    ),
-                then(c -> c.on(olderV, markV)
-                           .execute((p1, p2) -> result.value = p1.getName() + " is older than " + p2.getName()))
-                    );
+                    )
+                .then(c -> c.on(olderV, markV)
+                           .execute((p1, p2) -> result.value = p1.getName() + " is older than " + p2.getName()));
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
-        kieBase.addRule(rule);
+        kieBase.addRules(rule);
 
         KieSession ksession = kieBase.newKieSession();
 
@@ -98,19 +95,18 @@ public class FlowTest {
         Variable<Person> oldestV = bind(typeOf(Person.class));
         Variable<Person> otherV = bind(typeOf(Person.class));
 
-        Rule rule = rule(
-                view(
+        Rule rule = rule("not")
+                .view(
                         input(oldestV, () -> persons),
                         input(otherV, () -> persons),
                         expr(oldestV, p -> true),
                         not(otherV, oldestV, (p1, p2) -> p1.getAge() > p2.getAge())
-                    ),
-                then(c -> c.on(oldestV)
-                           .execute(p -> result.value = "Oldest person is " + p.getName()))
-                    );
+                    )
+                .then(c -> c.on(oldestV)
+                           .execute(p -> result.value = "Oldest person is " + p.getName()));
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
-        kieBase.addRule(rule);
+        kieBase.addRules(rule);
 
         KieSession ksession = kieBase.newKieSession();
 
