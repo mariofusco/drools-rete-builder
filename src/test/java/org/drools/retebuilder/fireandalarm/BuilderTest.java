@@ -40,7 +40,23 @@ public class BuilderTest {
                            .update(sprinkler, "on")
                     );
 
-        Rule r2 = rule("Raise the alarm when we have one or more fires")
+        Rule r2 = rule("When the fire is gone turn off the sprinkler")
+                .when(
+                        p -> p.filter(sprinkler)
+                              .with(s -> s.isOn()),
+                        not(p -> p.filter(fire)
+                                  .with(sprinkler, (f, s) -> f.getRoom().equals(s.getRoom()))
+                           )
+                     )
+                .then(c -> c.on(sprinkler)
+                            .execute(s -> {
+                                System.out.println("Turn off the sprinkler for room " + s.getRoom().getName());
+                                s.setOn(false);
+                            })
+                            .update(sprinkler, "on")
+                     );
+
+        Rule r3 = rule("Raise the alarm when we have one or more fires")
                 .when(
                         exists(p -> p.filter(fire))
                     )
@@ -48,26 +64,10 @@ public class BuilderTest {
                            .insert(() -> new Alarm())
                     );
 
-        Rule r3 = rule("When the fire is gone turn off the sprinkler")
-                .when(
-                        p -> p.filter(sprinkler)
-                              .with(s -> s.isOn()),
-                        not(p -> p.filter(fire)
-                                  .with(sprinkler, (f, s) -> f.getRoom().equals(s.getRoom()))
-                           )
-                    )
-                .then(c -> c.on(sprinkler)
-                           .execute(s -> {
-                               System.out.println("Turn off the sprinkler for room " + s.getRoom().getName());
-                               s.setOn(false);
-                           })
-                           .update(sprinkler, "on")
-                    );
-
         Rule r4 = rule("Lower the alarm when all the fires have gone")
                 .when(
-                       p -> p.filter(alarm),
-                       not(p -> p.filter(fire))
+                        not(p -> p.filter(fire)),
+                        p -> p.filter(alarm)
                     )
                 .then(c -> c.execute(() -> System.out.println("Lower the alarm"))
                            .delete(alarm)
@@ -85,7 +85,7 @@ public class BuilderTest {
         CanonicalKieBase kieBase = new CanonicalKieBase();
         kieBase.addRules(r1, r2, r3, r4, r5);
 
-        dumpRete(kieBase);
+        //dumpRete(kieBase);
 
         KieSession ksession = kieBase.newKieSession();
 

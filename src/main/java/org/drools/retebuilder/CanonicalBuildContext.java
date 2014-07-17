@@ -29,7 +29,9 @@ public class CanonicalBuildContext extends BuildContext {
         for (int i = 0; i < vars.length; i++) {
             boundVariables.put(vars[i], new ArgumentExtractor(patternCounter, i));
         }
-        patternCounter++;
+        if (vars.length > 0) {
+            patternCounter++;
+        }
     }
 
     public ArgumentMapper getVariableMapper(Variable variable) {

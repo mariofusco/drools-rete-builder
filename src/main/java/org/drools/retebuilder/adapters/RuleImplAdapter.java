@@ -14,7 +14,7 @@ public class RuleImplAdapter extends RuleImpl {
     private final Consequence consequence;
 
     public RuleImplAdapter(Rule rule, CanonicalBuildContext context) {
-        super("");
+        super(rule.getName());
         this.consequence = new ConsequenceAdapter(rule.getConsequence(), context);
     }
 

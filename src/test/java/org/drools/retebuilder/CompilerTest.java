@@ -31,7 +31,7 @@ public class CompilerTest {
                 "import " + Person.class.getCanonicalName() + ";" +
                 "rule R when\n" +
                 "  $p1 : Person(name == \"Mark\")\n" +
-                "  $p2 : Person(age > $p1.age)\n" +
+                "  $p2 : Person(name != \"Mark\", age > $p1.age)\n" +
                 "then\n" +
                 "  System.out.println($p2.getName() + \" is older than \" + $p1.getName());\n" +
                 "end";

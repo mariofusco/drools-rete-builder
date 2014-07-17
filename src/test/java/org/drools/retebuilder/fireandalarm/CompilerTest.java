@@ -10,8 +10,6 @@ import org.kie.api.builder.KieFileSystem;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.rule.FactHandle;
 
-import static org.drools.retebuilder.ReteDumper.dumpRete;
-
 public class CompilerTest {
 
     @Test
@@ -23,7 +21,7 @@ public class CompilerTest {
                 "import " + Sprinkler.class.getCanonicalName() + ";" +
                 "rule \"When there is a fire turn on the sprinkler\"\n" +
                 "when\n" +
-                "   Fire($room : room)\n" +
+                "   Fire( $room : room )\n" +
                 "   $sprinkler : Sprinkler( room == $room, !on )\n" +
                 "then\n" +
                 "   modify( $sprinkler ) { setOn( true ) };\n" +
@@ -32,8 +30,7 @@ public class CompilerTest {
                 "\n" +
                 "rule \"When the fire is gone turn off the sprinkler\"\n" +
                 "when\n" +
-                "   $room : Room( )\n" +
-                "   $sprinkler : Sprinkler( room == $room, on == true )\n" +
+                "   $sprinkler : Sprinkler( $room : room, on == true )\n" +
                 "   not Fire( room == $room )\n" +
                 "then\n" +
                 "   modify( $sprinkler ) { setOn( false ) };\n" +
@@ -66,7 +63,7 @@ public class CompilerTest {
                 "end\n";
 
         KieSession ksession = getKieSession(str);
-        dumpRete(ksession);
+        //dumpRete(ksession);
 
         // phase 1
         Room room1 = new Room("Room 1");

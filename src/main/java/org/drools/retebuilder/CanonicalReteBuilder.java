@@ -32,6 +32,7 @@ import org.drools.model.ExistentialPattern;
 import org.drools.model.Pattern;
 import org.drools.model.Rule;
 import org.drools.model.SingleConstraint;
+import org.drools.model.Variable;
 import org.drools.retebuilder.adapters.AccumulateAdapter;
 import org.drools.retebuilder.adapters.RuleImplAdapter;
 import org.drools.retebuilder.constraints.ConstraintEvaluator;
@@ -102,13 +103,15 @@ public class CanonicalReteBuilder {
         createObjectTypeNode(context, patternClass);
 
         buildConstraints(pattern, context);
+
         context.incrementCurrentPatternOffset();
 
         createLeftInputAdapterNode(context);
     }
 
     private void initConstraint(Pattern pattern, CanonicalBuildContext context) {
-        if (context.getTupleSource() == null && pattern instanceof AccumulatePattern) {
+        if (context.getTupleSource() == null &&
+            (pattern instanceof AccumulatePattern || pattern instanceof ExistentialPattern)) {
             createObjectTypeNode(context, InitialFactImpl.class);
             createLeftInputAdapterNode(context);
         }
@@ -119,22 +122,36 @@ public class CanonicalReteBuilder {
         if (pattern instanceof AccumulatePattern) {
             buildAccumulate((AccumulatePattern) pattern, context);
         }
+        if (context.getObjectSource() != null && context.getTupleSource() != null) {
+            buildBetaConstraint(pattern, null, context);
+        }
     }
 
     private void buildConstraint(Pattern pattern, Constraint constraint, CanonicalBuildContext context) {
         if (constraint.getType() == Constraint.Type.SINGLE) {
             SingleConstraint singleConstraint = (SingleConstraint) constraint;
             ConstraintEvaluator constraintEvaluator = new ConstraintEvaluator(pattern, singleConstraint);
-            if (singleConstraint.getVariables().length < 2) {
-                buildAlphaConstraint(pattern, constraintEvaluator, context);
-            } else {
-                buildBetaConstraint(pattern, constraintEvaluator, context);
+            if (singleConstraint.getVariables().length > 0) {
+                if (isAlphaConstraint(pattern, singleConstraint)) {
+                    buildAlphaConstraint(pattern, constraintEvaluator, context);
+                } else {
+                    buildBetaConstraint(pattern, constraintEvaluator, context);
+                }
             }
         } else if (pattern.getConstraint().getType() == Constraint.Type.AND) {
             for (Constraint child : constraint.getChildren()) {
                 buildConstraint(pattern, child, context);
             }
         }
+    }
+
+    private boolean isAlphaConstraint(Pattern pattern, SingleConstraint singleConstraint) {
+        for (Variable variable : singleConstraint.getVariables()) {
+            if (pattern.getPatternVariable() != variable) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void buildAccumulate(AccumulatePattern pattern, CanonicalBuildContext context) {
@@ -165,8 +182,7 @@ public class CanonicalReteBuilder {
                                                                               false, // existSubNetwort
                                                                               context);
 
-        context.setTupleSource( (LeftTupleSource) utils.attachNode( context, accNode ) );
-        context.setObjectSource( null );
+        attachBetaNode(context, accNode);
     }
 
     private void buildAlphaConstraint(Pattern pattern, ConstraintEvaluator constraintEvaluator, CanonicalBuildContext context) {
@@ -181,12 +197,7 @@ public class CanonicalReteBuilder {
     }
 
     private void buildBetaConstraint(Pattern pattern, ConstraintEvaluator constraintEvaluator, CanonicalBuildContext context) {
-        List<BetaNodeFieldConstraint> betaConstraintsList = new LinkedList<BetaNodeFieldConstraint>();
-        betaConstraintsList.add( new LambdaConstraint(constraintEvaluator) );
-
-        BetaConstraints betaConstraints = utils.createBetaNodeConstraint( context,
-                                                                          betaConstraintsList,
-                                                                          false );
+        BetaConstraints betaConstraints = buildBetaConstraints(constraintEvaluator, context);
 
         BetaNode beta = null;
         if (pattern instanceof ExistentialPattern) {
@@ -214,8 +225,23 @@ public class CanonicalReteBuilder {
                                                            context );
         }
 
+        attachBetaNode(context, beta);
+    }
+
+    private void attachBetaNode(CanonicalBuildContext context, BetaNode beta) {
         context.setTupleSource( (LeftTupleSource) utils.attachNode( context, beta ) );
         context.setObjectSource( null );
+    }
+
+    private BetaConstraints buildBetaConstraints(ConstraintEvaluator constraintEvaluator, CanonicalBuildContext context) {
+        List<BetaNodeFieldConstraint> betaConstraintsList = new LinkedList<BetaNodeFieldConstraint>();
+        if (constraintEvaluator != null) {
+            betaConstraintsList.add( new LambdaConstraint(constraintEvaluator) );
+        }
+
+        return utils.createBetaNodeConstraint( context,
+                                               betaConstraintsList,
+                                               false );
     }
 
     private EntryPointNode getEntryPoint(CanonicalBuildContext context, DataSource dataSource) {
