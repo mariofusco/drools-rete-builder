@@ -63,7 +63,6 @@ public class CompilerTest {
                 "end\n";
 
         KieSession ksession = getKieSession(str);
-        //dumpRete(ksession);
 
         // phase 1
         Room room1 = new Room("Room 1");

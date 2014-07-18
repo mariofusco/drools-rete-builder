@@ -44,8 +44,7 @@ public class LambdaAccumulator implements Accumulator {
 
     @Override
     public void reverse(Object workingMemoryContext, Object context, Tuple leftTuple, InternalFactHandle handle, Declaration[] declarations, Declaration[] innerDeclarations, WorkingMemory workingMemory) throws Exception {
-        throw new UnsupportedOperationException("org.drools.retebuilder.constraints.LambdaAccumulator.reverse -> TODO");
-
+        accumulateFunction.reverse((Serializable)context, handle.getObject());
     }
 
     @Override

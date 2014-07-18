@@ -40,8 +40,6 @@ import org.drools.retebuilder.constraints.LambdaAccumulator;
 import org.drools.retebuilder.constraints.LambdaConstraint;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -293,16 +291,4 @@ public class CanonicalReteBuilder {
             context.setObjectSource(null);
         }
     }
-
-    private static final DataSource DEFAULT_DATASOURCE = new DataSource() {
-        @Override
-        public Collection getObjects() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public void insert(Object item) {
-            throw new UnsupportedOperationException();
-        }
-    };
 }

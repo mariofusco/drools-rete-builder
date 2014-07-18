@@ -9,8 +9,12 @@ import org.kie.api.runtime.KieSession;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.drools.model.DSL.*;
+import static org.drools.model.DSL.bind;
+import static org.drools.model.DSL.typeOf;
+import static org.drools.model.DSL.rule;
 import static org.drools.model.flow.FlowDSL.*;
+import static org.drools.model.functions.accumulate.Average.avg;
+import static org.drools.model.functions.accumulate.Sum.sum;
 import static org.drools.model.impl.DataSourceImpl.sourceOf;
 import static org.junit.Assert.assertEquals;
 
@@ -99,7 +103,6 @@ public class FlowTest {
                 .view(
                         input(oldestV, () -> persons),
                         input(otherV, () -> persons),
-                        expr(oldestV, p -> true),
                         not(otherV, oldestV, (p1, p2) -> p1.getAge() > p2.getAge())
                     )
                 .then(c -> c.on(oldestV)
@@ -116,6 +119,41 @@ public class FlowTest {
 
         ksession.fireAllRules();
         assertEquals("Oldest person is Mario", result.value);
+    }
+
+    @Test
+    public void testAccumulate() {
+        DataSource persons = sourceOf(new Person("Mark", 37),
+                                      new Person("Edson", 35),
+                                      new Person("Mario", 40));
+
+        Result result = new Result();
+
+        Variable<Person> person = bind(typeOf(Person.class));
+        Variable<Integer> resultSum = bind(typeOf(Integer.class));
+        Variable<Double> resultAvg = bind(typeOf(Double.class));
+
+        Rule rule = rule("accumulate")
+                .view(
+                        input(person, () -> persons),
+                        accumulate(expr(person, p -> p.getName().startsWith("M")),
+                                   sum(Person::getAge).as(resultSum),
+                                   avg(Person::getAge).as(resultAvg))
+                     )
+                .then(c -> c.on(resultSum, resultAvg)
+                            .execute((sum, avg) -> result.value = "total = " + sum + "; average = " + avg));
+
+        CanonicalKieBase kieBase = new CanonicalKieBase();
+        kieBase.addRules(rule);
+
+        KieSession ksession = kieBase.newKieSession();
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Person("Edson", 35));
+        ksession.insert(new Person("Mario", 40));
+
+        ksession.fireAllRules();
+        assertEquals("total = 77; average = 38.5", result.value);
     }
 
     private static class Result {
