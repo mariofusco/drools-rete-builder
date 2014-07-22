@@ -9,10 +9,12 @@ import org.drools.model.functions.PredicateN;
 
 public class ConstraintEvaluator {
 
+    private final String id;
     private final PredicateN predicate;
     private final int[] argsPos;
 
     public ConstraintEvaluator(Pattern pattern, SingleConstraint constraint) {
+        this.id = constraint.getExprId();
         this.predicate = constraint.getPredicate();
         this.argsPos = findArgsPos(pattern, constraint);
     }
@@ -45,5 +47,17 @@ public class ConstraintEvaluator {
             params[i] = argsPos[i] >= 0 ? leftTuple.get(argsPos[i]).getObject() : handle.getObject();
         }
         return predicate.test(params);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        return id.equals(((ConstraintEvaluator) other).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

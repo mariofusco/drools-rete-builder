@@ -9,9 +9,7 @@ import org.kie.api.runtime.KieSession;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.drools.model.DSL.bind;
-import static org.drools.model.DSL.typeOf;
-import static org.drools.model.DSL.rule;
+import static org.drools.model.DSL.*;
 import static org.drools.model.flow.FlowDSL.*;
 import static org.drools.model.functions.accumulate.Average.avg;
 import static org.drools.model.functions.accumulate.Sum.sum;
@@ -140,8 +138,10 @@ public class FlowTest {
                                    sum(Person::getAge).as(resultSum),
                                    avg(Person::getAge).as(resultAvg))
                      )
-                .then(c -> c.on(resultSum, resultAvg)
-                            .execute((sum, avg) -> result.value = "total = " + sum + "; average = " + avg));
+                .then(
+                        on(resultSum, resultAvg)
+                                .execute((sum, avg) -> result.value = "total = " + sum + "; average = " + avg)
+                     );
 
         CanonicalKieBase kieBase = new CanonicalKieBase();
         kieBase.addRules(rule);

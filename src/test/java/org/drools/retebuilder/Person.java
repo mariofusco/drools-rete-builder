@@ -15,6 +15,10 @@ public class Person {
         return name;
     }
 
+    public String getNameWithAge() {
+        return name + " (" + age + ")";
+    }
+
     public void setName(String name) {
         this.name = name;
     }

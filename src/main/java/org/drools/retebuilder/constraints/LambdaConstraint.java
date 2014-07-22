@@ -57,4 +57,16 @@ public class LambdaConstraint extends MutableTypeConstraint {
     }
 
     public static class LambdaContextEntry extends MvelConstraint.MvelContextEntry { }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        return evaluator.equals(((LambdaConstraint) other).evaluator);
+    }
+
+    @Override
+    public int hashCode() {
+        return evaluator.hashCode();
+    }
 }
