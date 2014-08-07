@@ -155,6 +155,44 @@ public class BuilderTest {
         assertEquals("total = 77; average = 38.5", result.value);
     }
 
+    public static int findAge(Person person) {
+        return person.getAge();
+    }
+
+    @Test
+    public void testSyncInvocation() {
+        Result result = new Result();
+
+        DataSource persons = sourceOf(new Person("Mark", 37),
+                                      new Person("Edson", 35),
+                                      new Person("Mario", 40));
+
+        Variable<Person> mark = bind(typeOf(Person.class));
+        Variable<Integer> age = bind(typeOf(Integer.class));
+
+        Rule rule = rule("SyncInvocation")
+                .when(
+                        p -> p.filter(mark)
+                              .with(person -> person.getName().equals("Mark"))
+                              .from(persons),
+                        p -> p.set(age).invoking(mark, BuilderTest::findAge)
+                     )
+                .then(c -> c.on(mark, age)
+                            .execute((m, a) -> result.value = m + " is " + a + " years old"));
+
+        CanonicalKieBase kieBase = new CanonicalKieBase();
+        kieBase.addRules(rule);
+
+        KieSession ksession = kieBase.newKieSession();
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Person("Edson", 35));
+        ksession.insert(new Person("Mario", 40));
+
+        ksession.fireAllRules();
+        assertEquals("Mark is 37 years old", result.value);
+    }
+
     private static class Result {
         Object value;
     }

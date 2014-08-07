@@ -19,25 +19,31 @@ import org.drools.core.reteoo.TerminalNode;
 import org.drools.core.reteoo.builder.BuildUtils;
 import org.drools.core.rule.Accumulate;
 import org.drools.core.rule.EntryPointId;
+import org.drools.core.rule.From;
 import org.drools.core.rule.GroupElement;
 import org.drools.core.spi.Accumulator;
 import org.drools.core.spi.AlphaNodeFieldConstraint;
 import org.drools.core.spi.BetaNodeFieldConstraint;
+import org.drools.core.spi.DataProvider;
 import org.drools.core.spi.ObjectType;
 import org.drools.model.AccumulatePattern;
 import org.drools.model.Condition;
 import org.drools.model.Constraint;
 import org.drools.model.DataSource;
 import org.drools.model.ExistentialPattern;
+import org.drools.model.InvokerPattern;
 import org.drools.model.Pattern;
 import org.drools.model.Rule;
 import org.drools.model.SingleConstraint;
 import org.drools.model.Variable;
 import org.drools.retebuilder.adapters.AccumulateAdapter;
+import org.drools.retebuilder.adapters.FromAdapter;
 import org.drools.retebuilder.adapters.RuleImplAdapter;
 import org.drools.retebuilder.constraints.ConstraintEvaluator;
 import org.drools.retebuilder.constraints.LambdaAccumulator;
 import org.drools.retebuilder.constraints.LambdaConstraint;
+import org.drools.retebuilder.constraints.LambdaDataProvider;
+import org.drools.retebuilder.nodes.SyncInvokerNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,7 +93,7 @@ public class CanonicalReteBuilder {
                 buildCondition(subCondition, context);
             }
         } else if (condition.getType() instanceof Condition.OrType) {
-
+            // TODO
         }
     }
 
@@ -116,6 +122,10 @@ public class CanonicalReteBuilder {
     }
 
     private void buildConstraints(Pattern pattern, CanonicalBuildContext context) {
+        if (pattern instanceof InvokerPattern) {
+            buildInvoker((InvokerPattern)pattern, context);
+            return;
+        }
         buildConstraint(pattern, pattern.getConstraint(), context);
         if (pattern instanceof AccumulatePattern) {
             buildAccumulate((AccumulatePattern) pattern, context);
@@ -123,6 +133,13 @@ public class CanonicalReteBuilder {
         if (context.getObjectSource() != null && context.getTupleSource() != null) {
             buildBetaConstraint(pattern, null, context);
         }
+    }
+
+    private void buildInvoker(InvokerPattern pattern, CanonicalBuildContext context) {
+        DataProvider dataProvider = new LambdaDataProvider(pattern);
+        From from = new FromAdapter(dataProvider, pattern);
+        SyncInvokerNode node = new SyncInvokerNode(context, dataProvider, from);
+        attachBetaNode(context, node);
     }
 
     private void buildConstraint(Pattern pattern, Constraint constraint, CanonicalBuildContext context) {
@@ -226,7 +243,7 @@ public class CanonicalReteBuilder {
         attachBetaNode(context, beta);
     }
 
-    private void attachBetaNode(CanonicalBuildContext context, BetaNode beta) {
+    private void attachBetaNode(CanonicalBuildContext context, BaseNode beta) {
         context.setTupleSource( (LeftTupleSource) utils.attachNode( context, beta ) );
         context.setObjectSource( null );
     }

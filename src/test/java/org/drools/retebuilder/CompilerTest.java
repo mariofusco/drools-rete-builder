@@ -73,10 +73,7 @@ public class CompilerTest {
                 "  System.out.println( $sum );\n" +
                 "end";
 
-        KieServices ks = KieServices.Factory.get();
-        KieFileSystem kfs = ks.newKieFileSystem().write( "src/main/resources/r1.drl", str );
-        ks.newKieBuilder( kfs ).buildAll().getResults();
-        KieSession ksession = ks.newKieContainer(ks.getRepository().getDefaultReleaseId()).newKieSession();
+        KieSession ksession = getKieSession(str);
 
         ksession.insert(new Person("Mark", 37));
         ksession.insert(new Person("Edson", 35));
@@ -89,5 +86,49 @@ public class CompilerTest {
         KieFileSystem kfs = ks.newKieFileSystem().write( "src/main/resources/r1.drl", str );
         ks.newKieBuilder( kfs ).buildAll();
         return ks.newKieContainer(ks.getRepository().getDefaultReleaseId()).newKieSession();
+    }
+
+    @Test
+    public void testQuery() {
+        String str =
+                "import " + Person.class.getCanonicalName() + ";\n" +
+                "query isOlder( Person $p1, Person $p2 )\n" +
+                "    $p2 := Person( age > $p1.age )\n" +
+                "end\n" +
+                "rule R when\n" +
+                "  $p1 : Person(name == \"Mark\")\n" +
+                "  isOlder( $p1, $p2; )\n" +
+                "then\n" +
+                "  System.out.println($p2.getName() + \" is older than \" + $p1.getName());\n" +
+                "end";
+
+        KieSession ksession = getKieSession(str);
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Person("Edson", 35));
+        ksession.insert(new Person("Mario", 40));
+        ksession.fireAllRules();
+    }
+
+    @Test
+    public void testFunction() {
+        String str =
+                "import " + Person.class.getCanonicalName() + ";\n" +
+                "function int findAge(Person person) {\n" +
+                "    return person.getAge();\n" +
+                "}\n" +
+                "rule R when\n" +
+                "  $p1 : Person(name == \"Mark\")\n" +
+                "  $age : Integer() from findAge($p1)" +
+                "then\n" +
+                "  System.out.println($age);\n" +
+                "end";
+
+        KieSession ksession = getKieSession(str);
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Person("Edson", 35));
+        ksession.insert(new Person("Mario", 40));
+        ksession.fireAllRules();
     }
 }

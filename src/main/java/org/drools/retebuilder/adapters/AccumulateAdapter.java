@@ -2,28 +2,28 @@ package org.drools.retebuilder.adapters;
 
 import org.drools.core.WorkingMemory;
 import org.drools.core.common.InternalFactHandle;
-import org.drools.core.rule.Accumulate;
 import org.drools.core.rule.Declaration;
+import org.drools.core.rule.MultiAccumulate;
 import org.drools.core.spi.Accumulator;
 import org.drools.core.spi.Tuple;
 
-public class AccumulateAdapter extends Accumulate {
+public class AccumulateAdapter extends MultiAccumulate {
 
     public AccumulateAdapter(Accumulator[] accumulators) {
 
-        super(null, new Declaration[0], accumulators, true);
+        super(null, new Declaration[0], accumulators);
     }
 
     @Override
-    public void accumulate(final Object[] workingMemoryContext,
-                           final Object[] context,
+    public void accumulate(final Object workingMemoryContext,
+                           final Object context,
                            final Tuple leftTuple,
                            final InternalFactHandle handle,
                            final WorkingMemory workingMemory) {
         try {
-            for ( int i = 0; i < getAccumulators().length; i++ ) {
-                getAccumulators()[i].accumulate( workingMemoryContext[i],
-                                                 context[i],
+            for ( int i = 0; i < this.getAccumulators().length; i++ ) {
+                getAccumulators()[i].accumulate( ((Object[])workingMemoryContext)[i],
+                                                 ((Object[])context)[i],
                                                  leftTuple,
                                                  handle,
                                                  null, // this.requiredDeclarations
