@@ -5,7 +5,9 @@ import org.drools.core.rule.Declaration;
 import org.drools.core.spi.DataProvider;
 import org.drools.core.spi.PropagationContext;
 import org.drools.core.spi.Tuple;
+import org.drools.model.InvokerMultiValuePattern;
 import org.drools.model.InvokerPattern;
+import org.drools.model.InvokerSingleValuePattern;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -13,12 +15,12 @@ import java.util.Iterator;
 import static org.drools.retebuilder.constraints.EvaluationUtil.findArgsPos;
 import static org.drools.retebuilder.constraints.EvaluationUtil.getInvocationArgs;
 
-public class LambdaDataProvider implements DataProvider {
+public class LambdaDataProvider<T> implements DataProvider {
 
-    private final InvokerPattern pattern;
+    private final InvokerPattern<T> pattern;
     private final int[] argsPos;
 
-    public LambdaDataProvider(InvokerPattern pattern) {
+    public LambdaDataProvider(InvokerPattern<T> pattern) {
         this.pattern = pattern;
         this.argsPos = findArgsPos(pattern, pattern.getInputVariables());
     }
@@ -35,8 +37,12 @@ public class LambdaDataProvider implements DataProvider {
 
     @Override
     public Iterator getResults(Tuple tuple, WorkingMemory wm, PropagationContext ctx, Object providerContext) {
-        Object result = pattern.getInvokedFunction().apply( getInvocationArgs(argsPos, null, tuple) );
-        return Arrays.asList(result).iterator();
+        if (pattern.isMultiValue()) {
+            return ((InvokerMultiValuePattern<T>)pattern).getInvokedFunction().apply( getInvocationArgs(argsPos, null, tuple) ).iterator();
+        } else {
+            Object result = ((InvokerSingleValuePattern<T>)pattern).getInvokedFunction().apply( getInvocationArgs(argsPos, null, tuple) );
+            return Arrays.asList(result).iterator();
+        }
     }
 
     @Override

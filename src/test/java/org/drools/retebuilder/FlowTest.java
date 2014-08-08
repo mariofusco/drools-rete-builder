@@ -9,12 +9,14 @@ import org.kie.api.runtime.KieSession;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.drools.model.DSL.*;
 import static org.drools.model.flow.FlowDSL.*;
 import static org.drools.model.functions.accumulate.Average.avg;
 import static org.drools.model.functions.accumulate.Sum.sum;
 import static org.drools.model.impl.DataSourceImpl.sourceOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class FlowTest {
 
@@ -161,10 +163,8 @@ public class FlowTest {
     }
 
     @Test
-    public void testSyncInvocation() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
-                                      new Person("Edson", 35),
-                                      new Person("Mario", 40));
+    public void testInlineInvocation() {
+        DataSource persons = sourceOf();
 
         Result result = new Result();
 
@@ -191,6 +191,41 @@ public class FlowTest {
 
         ksession.fireAllRules();
         assertEquals("Mark is 37 years old", result.value);
+    }
+
+    @Test
+    public void testInlineInvocationIterable() {
+        List<String> result = new ArrayList<String>();
+
+        DataSource persons = sourceOf();
+
+        Variable<Person> mario = bind(typeOf(Person.class));
+        Variable<Person> parent = bind(typeOf(Person.class));
+
+        Rule rule = rule("SyncInvocation")
+                .view(
+                        input(mario, () -> persons),
+                        expr(mario, person -> person.getName().equals("Mario")),
+                        set(parent).in(mario, Person::getParents)
+                     )
+                .then(on(mario, parent)
+                              .execute((m, p) -> result.add(p + " is parent of " + m)));
+
+        CanonicalKieBase kieBase = new CanonicalKieBase();
+        kieBase.addRules(rule);
+
+        KieSession ksession = kieBase.newKieSession();
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Person("Edson", 35));
+        ksession.insert(new Person("Mario", 40)
+                                .setParents(asList(new Person("Mimmo", 75),
+                                                   new Person("Tina", 65))));
+
+        ksession.fireAllRules();
+        assertEquals(2, result.size());
+        assertTrue(result.contains("Mimmo is parent of Mario"));
+        assertTrue(result.contains("Tina is parent of Mario"));
     }
 
     private static class Result {

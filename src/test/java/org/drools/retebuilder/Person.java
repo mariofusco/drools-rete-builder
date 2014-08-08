@@ -1,8 +1,12 @@
 package org.drools.retebuilder;
 
+import java.util.List;
+
 public class Person {
     private String name;
     private int age;
+
+    private List<Person> parents;
 
     public Person() { }
 
@@ -29,6 +33,15 @@ public class Person {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public List<Person> getParents() {
+        return parents;
+    }
+
+    public Person setParents(List<Person> parents) {
+        this.parents = parents;
+        return this;
     }
 
     @Override
