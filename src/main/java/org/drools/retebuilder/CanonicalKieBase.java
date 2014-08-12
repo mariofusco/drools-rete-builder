@@ -11,6 +11,8 @@ import org.drools.core.reteoo.builder.NodeFactory;
 import org.drools.core.rule.EntryPointId;
 import org.drools.model.Rule;
 import org.drools.retebuilder.adapters.ReteooBuilderAdapter;
+import org.drools.retebuilder.nodes.DataStreamNode;
+import org.kie.api.runtime.KieSession;
 import org.kie.internal.KnowledgeBaseFactory;
 
 import java.util.UUID;
@@ -58,6 +60,15 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
     @Override
     public int getNodeCount() {
         return this.reteBuilder.getIdGenerator().getLastId() + 1;
+    }
+
+    @Override
+    public KieSession newKieSession() {
+        KieSession kSession = super.newKieSession();
+        for (DataStreamNode streamNode : reteBuilder.getDataStreamNodes()) {
+            streamNode.registerDataStreamObserver(kSession);
+        }
+        return kSession;
     }
 
     public ReteooBuilder getReteooBuilder() {

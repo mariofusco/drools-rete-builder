@@ -14,7 +14,6 @@ import static org.drools.model.DSL.*;
 import static org.drools.model.flow.FlowDSL.*;
 import static org.drools.model.functions.accumulate.Average.avg;
 import static org.drools.model.functions.accumulate.Sum.sum;
-import static org.drools.model.impl.DataSourceImpl.sourceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -22,7 +21,7 @@ public class FlowTest {
 
     @Test
     public void testAlpha() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
+        DataSource persons = storeOf( new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
@@ -53,7 +52,7 @@ public class FlowTest {
 
     @Test
     public void testBeta() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
+        DataSource persons = storeOf( new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
@@ -89,7 +88,7 @@ public class FlowTest {
 
     @Test
     public void testNot() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
+        DataSource persons = storeOf( new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
@@ -123,7 +122,7 @@ public class FlowTest {
 
     @Test
     public void testAccumulate() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
+        DataSource persons = storeOf( new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
@@ -164,7 +163,7 @@ public class FlowTest {
 
     @Test
     public void testInlineInvocation() {
-        DataSource persons = sourceOf();
+        DataSource persons = storeOf();
 
         Result result = new Result();
 
@@ -197,7 +196,7 @@ public class FlowTest {
     public void testInlineInvocationIterable() {
         List<String> result = new ArrayList<String>();
 
-        DataSource persons = sourceOf();
+        DataSource persons = storeOf();
 
         Variable<Person> mario = bind(typeOf(Person.class));
         Variable<Person> parent = bind(typeOf(Person.class));

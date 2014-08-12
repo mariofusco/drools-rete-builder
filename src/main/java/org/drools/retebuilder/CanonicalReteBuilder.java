@@ -30,6 +30,7 @@ import org.drools.model.AccumulatePattern;
 import org.drools.model.Condition;
 import org.drools.model.Constraint;
 import org.drools.model.DataSource;
+import org.drools.model.DataStream;
 import org.drools.model.ExistentialPattern;
 import org.drools.model.InvokerPattern;
 import org.drools.model.Pattern;
@@ -43,9 +44,11 @@ import org.drools.retebuilder.constraints.ConstraintEvaluator;
 import org.drools.retebuilder.constraints.LambdaAccumulator;
 import org.drools.retebuilder.constraints.LambdaConstraint;
 import org.drools.retebuilder.constraints.LambdaDataProvider;
+import org.drools.retebuilder.nodes.DataStreamNode;
 import org.drools.retebuilder.nodes.SyncInvokerNode;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,6 +61,8 @@ public class CanonicalReteBuilder {
 
     private final Map<DataSource, EntryPointNode> entryPoints = new HashMap<DataSource, EntryPointNode>();
 
+    private final Map<Variable, DataStreamNode> streamNodes = new HashMap<Variable, DataStreamNode>();
+
     private final BuildUtils utils = new BuildUtils();
 
     public CanonicalReteBuilder(CanonicalKieBase kieBase) {
@@ -67,6 +72,10 @@ public class CanonicalReteBuilder {
 
     public ReteooBuilder.IdGenerator getIdGenerator() {
         return idGenerator;
+    }
+
+    Collection<DataStreamNode> getDataStreamNodes() {
+        return streamNodes.values();
     }
 
     public void addRule(Rule rule) {
@@ -98,27 +107,37 @@ public class CanonicalReteBuilder {
     }
 
     private void buildPattern(Pattern pattern, CanonicalBuildContext context) {
-        initConstraint(pattern, context);
-
-        context.setObjectSource(getEntryPoint(context, pattern.getDataSource()));
-        context.addBoundVariables(pattern);
-
-        Class<?> patternClass = pattern.getPatternVariable().getType().asClass();
-        createObjectTypeNode(context, patternClass);
-
+        initPattern(pattern, context);
         buildConstraints(pattern, context);
-
         context.incrementCurrentPatternOffset();
-
         createLeftInputAdapterNode(context);
     }
 
-    private void initConstraint(Pattern pattern, CanonicalBuildContext context) {
+    private void initPattern(Pattern pattern, CanonicalBuildContext context) {
         if (context.getTupleSource() == null &&
             (pattern instanceof AccumulatePattern || pattern instanceof ExistentialPattern)) {
             createObjectTypeNode(context, InitialFactImpl.class);
             createLeftInputAdapterNode(context);
         }
+
+        DataSource dataSource = (DataSource) pattern.getDataSourceSupplier().apply();
+
+        if (dataSource instanceof DataStream) {
+            Variable var = pattern.getPatternVariable();
+            DataStreamNode dataStreamNode = streamNodes.get(var);
+            if (dataStreamNode == null) {
+                dataStreamNode = new DataStreamNode(new ClassObjectType(pattern.getPatternVariable().getType().asClass()),
+                                                    context,
+                                                    (DataStream)dataSource);
+                streamNodes.put(var, dataStreamNode);
+            }
+            context.setObjectSource( dataStreamNode );
+        } else {
+            context.setObjectSource( getEntryPoint(context, pattern, dataSource) );
+            createObjectTypeNode(context, pattern.getPatternVariable().getType().asClass());
+        }
+
+        context.addBoundVariables(pattern);
     }
 
     private void buildConstraints(Pattern pattern, CanonicalBuildContext context) {
@@ -259,10 +278,11 @@ public class CanonicalReteBuilder {
                                                false );
     }
 
-    private EntryPointNode getEntryPoint(CanonicalBuildContext context, DataSource dataSource) {
+    private EntryPointNode getEntryPoint(CanonicalBuildContext context, Pattern pattern, DataSource dataSource) {
         if (true) { // TODO now it always returns default entry point
             return context.getKnowledgeBase().getRete().getEntryPointNode( EntryPointId.DEFAULT );
         }
+
         EntryPointNode epn = entryPoints.get(dataSource);
         if (epn == null) {
             epn = kieBase.getNodeFactory().buildEntryPointNode( idGenerator.getNextId(),
@@ -296,7 +316,7 @@ public class CanonicalReteBuilder {
     private void createLeftInputAdapterNode(CanonicalBuildContext context) {
         if (context.getObjectSource() != null && context.getTupleSource() == null) {
             ObjectSource source = context.getObjectSource();
-            while ( !(source.getType() ==  NodeTypeEnums.ObjectTypeNode ) ) {
+            while ( source.getType() != NodeTypeEnums.ObjectTypeNode ) {
                 source = source.getParentObjectSource();
             }
             context.setRootObjectTypeNode( (ObjectTypeNode) source );

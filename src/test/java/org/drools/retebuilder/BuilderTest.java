@@ -13,7 +13,6 @@ import static java.util.Arrays.asList;
 import static org.drools.model.DSL.*;
 import static org.drools.model.functions.accumulate.Average.avg;
 import static org.drools.model.functions.accumulate.Sum.sum;
-import static org.drools.model.impl.DataSourceImpl.sourceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -21,7 +20,7 @@ public class BuilderTest {
 
     @Test
     public void testAlpha() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
+        DataSource persons = storeOf( new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
@@ -32,7 +31,7 @@ public class BuilderTest {
         Rule rule = rule("alpha")
                 .when(p -> p.filter(mark)
                            .with(person -> person.getName().equals("Mark"))
-                           .from(persons))
+                           .from(() -> persons))
                 .then(c -> c.on(mark)
                            .execute(p -> result.value = p.getName()));
 
@@ -51,7 +50,7 @@ public class BuilderTest {
 
     @Test
     public void testBeta() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
+        DataSource persons = storeOf( new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
@@ -65,11 +64,11 @@ public class BuilderTest {
                 .when(
                         p -> p.filter(mark)
                               .with(person -> person.getName().equals("Mark"))
-                              .from(persons),
+                              .from(() -> persons),
                         p -> p.filter(older)
                               .with(person -> !person.getName().equals("Mark"))
                               .and(older, mark, (p1, p2) -> p1.getAge() > p2.getAge())
-                              .from(persons)
+                              .from(() -> persons)
                     )
                 .then(c -> c.on(older, mark)
                            .execute((p1, p2) -> result.value = p1.getName() + " is older than " + p2.getName()));
@@ -89,7 +88,7 @@ public class BuilderTest {
 
     @Test
     public void testNot() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
+        DataSource persons = storeOf( new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
@@ -101,10 +100,10 @@ public class BuilderTest {
         Rule rule = rule("not")
                 .when(
                         p -> p.filter(oldest)
-                              .from(persons),
+                              .from(() -> persons),
                         not(p -> p.filter(typeOf(Person.class))
                                   .with(oldest, (p1, p2) -> p1.getAge() > p2.getAge())
-                                  .from(persons))
+                                  .from(() -> persons))
                     )
                 .then(c -> c.on(oldest)
                            .execute(p -> result.value = "Oldest person is " + p.getName()));
@@ -124,7 +123,7 @@ public class BuilderTest {
 
     @Test
     public void testAccumulate() {
-        DataSource persons = sourceOf(new Person("Mark", 37),
+        DataSource persons = storeOf( new Person("Mark", 37),
                                       new Person("Edson", 35),
                                       new Person("Mario", 40));
 
@@ -137,7 +136,7 @@ public class BuilderTest {
                 .when(
                         accumulate(p -> p.filter(typeOf(Person.class))
                                          .with(person -> person.getName().startsWith("M"))
-                                         .from(persons),
+                                         .from(() -> persons),
                                    sum(Person::getAge).as(resultSum),
                                    avg(Person::getAge).as(resultAvg))
                     )
@@ -165,7 +164,7 @@ public class BuilderTest {
     public void testInlineInvocation() {
         Result result = new Result();
 
-        DataSource persons = sourceOf();
+        DataSource persons = storeOf();
 
         Variable<Person> mark = bind(typeOf(Person.class));
         Variable<Integer> age = bind(typeOf(Integer.class));
@@ -174,7 +173,7 @@ public class BuilderTest {
                 .when(
                         p -> p.filter(mark)
                               .with(person -> person.getName().equals("Mark"))
-                              .from(persons),
+                              .from(() -> persons),
                         p -> p.set(age).invoking(mark, BuilderTest::findAge)
                      )
                 .then(c -> c.on(mark, age)
@@ -197,7 +196,7 @@ public class BuilderTest {
     public void testInlineInvocationIterable() {
         List<String> result = new ArrayList<String>();
 
-        DataSource persons = sourceOf();
+        DataSource persons = storeOf();
 
         Variable<Person> mario = bind(typeOf(Person.class));
         Variable<Person> parent = bind(typeOf(Person.class));
@@ -206,7 +205,7 @@ public class BuilderTest {
                 .when(
                         p -> p.filter(mario)
                               .with(person -> person.getName().equals("Mario"))
-                              .from(persons),
+                              .from(() -> persons),
                         p -> p.set(parent).in(mario, Person::getParents)
                      )
                 .then(c -> c.on(mario, parent)
