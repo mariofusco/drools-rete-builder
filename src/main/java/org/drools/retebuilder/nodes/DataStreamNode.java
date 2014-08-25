@@ -15,6 +15,7 @@ import org.drools.core.spi.ObjectType;
 import org.drools.core.spi.PropagationContext;
 import org.drools.core.spi.RuleComponent;
 import org.drools.model.DataStream;
+import org.drools.model.functions.Function0;
 import org.kie.api.definition.rule.Rule;
 import org.kie.api.runtime.KieSession;
 
@@ -26,11 +27,11 @@ import java.util.UUID;
 public class DataStreamNode extends ObjectTypeNode {
 
     private final EntryPointId entryPointId;
-    private final DataStream dataStream;
+    private final Function0<DataStream> dataStreamSupplier;
 
     public DataStreamNode(final ObjectType objectType,
                           final BuildContext context,
-                          final DataStream dataStream) {
+                          final Function0<DataStream> dataStreamSupplier) {
         this.id = context.getNextId();
         this.partitionId = context.getPartitionId();
         this.partitionsEnabled = context.getKnowledgeBase().getConfiguration().isMultithreadEvaluation();
@@ -40,7 +41,7 @@ public class DataStreamNode extends ObjectTypeNode {
         this.objectType = objectType;
         setObjectMemoryEnabled( context.isObjectTypeNodeMemoryEnabled() );
 
-        this.dataStream = dataStream;
+        this.dataStreamSupplier = dataStreamSupplier;
         this.entryPointId = new EntryPointId( UUID.randomUUID().toString() );
         new DataStreamEntryPointNode(context, entryPointId);
     }
@@ -97,7 +98,7 @@ public class DataStreamNode extends ObjectTypeNode {
             this.handleFactory = workingMemory.getFactHandleFactory();
             this.pctxFactory = workingMemory.getKnowledgeBase().getConfiguration().getComponentFactory().getPropagationContextFactory();
 
-            ((Observable)dataStreamNode.dataStream).addObserver(this);
+            dataStreamNode.dataStreamSupplier.apply().addObserver(this);
         }
 
         @Override

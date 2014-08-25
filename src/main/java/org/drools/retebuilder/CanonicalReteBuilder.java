@@ -37,6 +37,7 @@ import org.drools.model.Pattern;
 import org.drools.model.Rule;
 import org.drools.model.SingleConstraint;
 import org.drools.model.Variable;
+import org.drools.model.functions.Function0;
 import org.drools.retebuilder.adapters.AccumulateAdapter;
 import org.drools.retebuilder.adapters.FromAdapter;
 import org.drools.retebuilder.adapters.RuleImplAdapter;
@@ -113,14 +114,15 @@ public class CanonicalReteBuilder {
         createLeftInputAdapterNode(context);
     }
 
-    private void initPattern(Pattern pattern, CanonicalBuildContext context) {
+    private void initPattern(Pattern<?> pattern, CanonicalBuildContext context) {
         if (context.getTupleSource() == null &&
             (pattern instanceof AccumulatePattern || pattern instanceof ExistentialPattern)) {
             createObjectTypeNode(context, InitialFactImpl.class);
             createLeftInputAdapterNode(context);
         }
 
-        DataSource dataSource = (DataSource) pattern.getDataSourceSupplier().apply();
+        // TODO: avoid applying the supplier to check if the DataSource is a DataStream
+        DataSource dataSource = pattern.getDataSourceSupplier().apply();
 
         if (dataSource instanceof DataStream) {
             Variable var = pattern.getPatternVariable();
@@ -128,7 +130,7 @@ public class CanonicalReteBuilder {
             if (dataStreamNode == null) {
                 dataStreamNode = new DataStreamNode(new ClassObjectType(pattern.getPatternVariable().getType().asClass()),
                                                     context,
-                                                    (DataStream)dataSource);
+                                                    (Function0<DataStream>)pattern.getDataSourceSupplier());
                 streamNodes.put(var, dataStreamNode);
             }
             context.setObjectSource( dataStreamNode );

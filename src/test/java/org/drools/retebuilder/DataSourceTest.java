@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 public class DataSourceTest {
 
     @Test
-    public void testDataSourceInsert() {
+    public void testDataStreamInsert() {
         DataStream persons = newDataStream();
 
         AtomicReference<String> result = new AtomicReference<String>();
@@ -23,7 +23,7 @@ public class DataSourceTest {
         Variable<Person> mark = bind(typeOf(Person.class));
         Variable<Integer> age = bind(typeOf(Integer.class));
 
-        Rule rule = rule("SyncInvocation")
+        Rule rule = rule("R")
                 .view(
                         input(mark, () -> persons),
                         expr(mark, person -> person.getName().equals("Mark")),
@@ -43,5 +43,32 @@ public class DataSourceTest {
 
         ksession.fireAllRules();
         assertEquals("Mark is 37 years old", result.get());
+    }
+
+    @Test
+    public void testDataStreamOf() {
+        AtomicReference<String> result = new AtomicReference<String>();
+
+        Variable<Person> edson = bind(typeOf(Person.class));
+        Variable<Integer> age = bind(typeOf(Integer.class));
+
+        Rule rule = rule("R")
+                .view(
+                        input(edson, () -> streamOf(new Person("Mark", 37),
+                                                    new Person("Edson", 35),
+                                                    new Person("Mario", 40))),
+                        expr(edson, person -> person.getName().equals("Edson")),
+                        set(age).invoking(edson, Person::getAge)
+                     )
+                .then(on(edson, age)
+                              .execute((e, a) -> result.set( e + " is " + a + " years old" )));
+
+        CanonicalKieBase kieBase = new CanonicalKieBase();
+        kieBase.addRules(rule);
+
+        KieSession ksession = kieBase.newKieSession();
+
+        ksession.fireAllRules();
+        assertEquals("Edson is 35 years old", result.get());
     }
 }
