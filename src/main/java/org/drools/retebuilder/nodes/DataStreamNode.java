@@ -14,24 +14,23 @@ import org.drools.core.spi.FactHandleFactory;
 import org.drools.core.spi.ObjectType;
 import org.drools.core.spi.PropagationContext;
 import org.drools.core.spi.RuleComponent;
-import org.drools.model.DataStream;
-import org.drools.model.functions.Function0;
+import org.drools.datasource.DataSourceObserver;
+import org.drools.datasource.Observable;
+import org.drools.model.DataSourceDefinition;
 import org.kie.api.definition.rule.Rule;
 import org.kie.api.runtime.KieSession;
 
 import java.util.HashMap;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.UUID;
 
 public class DataStreamNode extends ObjectTypeNode {
 
     private final EntryPointId entryPointId;
-    private final Function0<DataStream> dataStreamSupplier;
+    private final DataSourceDefinition dataSourceDef;
 
     public DataStreamNode(final ObjectType objectType,
                           final BuildContext context,
-                          final Function0<DataStream> dataStreamSupplier) {
+                          final DataSourceDefinition dataSourceDef) {
         this.id = context.getNextId();
         this.partitionId = context.getPartitionId();
         this.partitionsEnabled = context.getKnowledgeBase().getConfiguration().isMultithreadEvaluation();
@@ -41,7 +40,7 @@ public class DataStreamNode extends ObjectTypeNode {
         this.objectType = objectType;
         setObjectMemoryEnabled( context.isObjectTypeNodeMemoryEnabled() );
 
-        this.dataStreamSupplier = dataStreamSupplier;
+        this.dataSourceDef = dataSourceDef;
         this.entryPointId = new EntryPointId( UUID.randomUUID().toString() );
         new DataStreamEntryPointNode(context, entryPointId);
     }
@@ -65,8 +64,8 @@ public class DataStreamNode extends ObjectTypeNode {
         return this.objectType.equals(other.objectType);
     }
 
-    public void registerDataStreamObserver(KieSession kieSession) {
-        new DataStreamObserver((InternalWorkingMemory)kieSession, this);
+    public void registerDataStreamObserver(KieSession kieSession, Observable observable) {
+        new DataStreamObserver((InternalWorkingMemory)kieSession, this, observable);
     }
 
     public static class DataStreamEntryPointNode extends EntryPointNode {
@@ -82,7 +81,7 @@ public class DataStreamNode extends ObjectTypeNode {
 
     }
 
-    public static class DataStreamObserver implements Observer {
+    public static class DataStreamObserver implements DataSourceObserver {
 
         private final InternalWorkingMemory workingMemory;
         private final DataStreamNode dataStreamNode;
@@ -90,7 +89,7 @@ public class DataStreamNode extends ObjectTypeNode {
         private final FactHandleFactory handleFactory;
         private final PropagationContextFactory pctxFactory;
 
-        public DataStreamObserver(InternalWorkingMemory workingMemory, DataStreamNode dataStreamNode) {
+        public DataStreamObserver(InternalWorkingMemory workingMemory, DataStreamNode dataStreamNode, Observable observable) {
             this.workingMemory = workingMemory;
             this.dataStreamNode = dataStreamNode;
 
@@ -98,11 +97,11 @@ public class DataStreamNode extends ObjectTypeNode {
             this.handleFactory = workingMemory.getFactHandleFactory();
             this.pctxFactory = workingMemory.getKnowledgeBase().getConfiguration().getComponentFactory().getPropagationContextFactory();
 
-            dataStreamNode.dataStreamSupplier.apply().addObserver(this);
+            observable.addObserver(this);
         }
 
         @Override
-        public void update(Observable observable, Object object) {
+        public boolean objectInserted(Object object) {
             ObjectTypeConf typeConf = typeConfReg.getObjectTypeConf( dataStreamNode.entryPointId,
                                                                      object );
 
@@ -122,6 +121,18 @@ public class DataStreamNode extends ObjectTypeNode {
             dataStreamNode.sink.propagateAssertObject( factHandle,
                                                        pctx,
                                                        workingMemory );
+
+            return true;
+        }
+
+        @Override
+        public boolean objectUpdated(Object obj) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean objectDeleted(Object obj) {
+            throw new UnsupportedOperationException();
         }
     }
 }

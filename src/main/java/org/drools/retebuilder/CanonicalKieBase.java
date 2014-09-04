@@ -65,10 +65,11 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
     @Override
     public KieSession newKieSession() {
         KieSession kSession = super.newKieSession();
-        for (DataStreamNode streamNode : reteBuilder.getDataStreamNodes()) {
-            streamNode.registerDataStreamObserver(kSession);
-        }
         return kSession;
+    }
+
+    DataStreamNode getDataStreamNode(String dataSourceName) {
+        return reteBuilder.getDataStreamNode(dataSourceName);
     }
 
     public ReteooBuilder getReteooBuilder() {

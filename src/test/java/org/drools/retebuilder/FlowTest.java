@@ -1,6 +1,5 @@
 package org.drools.retebuilder;
 
-import org.drools.model.DataSource;
 import org.drools.model.Rule;
 import org.drools.model.Variable;
 import org.junit.Test;
@@ -11,7 +10,6 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.drools.model.DSL.*;
-import static org.drools.model.flow.FlowDSL.*;
 import static org.drools.model.functions.accumulate.Average.avg;
 import static org.drools.model.functions.accumulate.Sum.sum;
 import static org.junit.Assert.assertEquals;
@@ -21,17 +19,13 @@ public class FlowTest {
 
     @Test
     public void testAlpha() {
-        DataSource persons = storeOf( new Person("Mark", 37),
-                                      new Person("Edson", 35),
-                                      new Person("Mario", 40));
-
         Result result = new Result();
 
         Variable<Person> markV = bind(typeOf(Person.class));
 
         Rule rule = rule("alpha")
                 .view(
-                        input(markV, () -> persons),
+                        input(markV),
                         expr(markV, mark -> mark.getName().equals("Mark"))
                     )
                 .then(c -> c.on(markV)
@@ -52,10 +46,6 @@ public class FlowTest {
 
     @Test
     public void testBeta() {
-        DataSource persons = storeOf( new Person("Mark", 37),
-                                      new Person("Edson", 35),
-                                      new Person("Mario", 40));
-
         Result result = new Result();
 
         List<String> list = new ArrayList<>();
@@ -64,8 +54,8 @@ public class FlowTest {
 
         Rule rule = rule("beta")
                 .view(
-                        input(markV, () -> persons),
-                        input(olderV, () -> persons),
+                        input(markV),
+                        input(olderV),
                         expr(markV, mark -> mark.getName().equals("Mark")),
                         expr(olderV, older -> !older.getName().equals("Mark")),
                         expr(olderV, markV, (older, mark) -> older.getAge() > mark.getAge())
@@ -88,10 +78,6 @@ public class FlowTest {
 
     @Test
     public void testNot() {
-        DataSource persons = storeOf( new Person("Mark", 37),
-                                      new Person("Edson", 35),
-                                      new Person("Mario", 40));
-
         Result result = new Result();
 
         List<String> list = new ArrayList<>();
@@ -100,8 +86,8 @@ public class FlowTest {
 
         Rule rule = rule("not")
                 .view(
-                        input(oldestV, () -> persons),
-                        input(otherV, () -> persons),
+                        input(oldestV),
+                        input(otherV),
                         not(otherV, oldestV, (p1, p2) -> p1.getAge() > p2.getAge())
                     )
                 .then(c -> c.on(oldestV)
@@ -122,10 +108,6 @@ public class FlowTest {
 
     @Test
     public void testAccumulate() {
-        DataSource persons = storeOf( new Person("Mark", 37),
-                                      new Person("Edson", 35),
-                                      new Person("Mario", 40));
-
         Result result = new Result();
 
         Variable<Person> person = bind(typeOf(Person.class));
@@ -134,7 +116,7 @@ public class FlowTest {
 
         Rule rule = rule("accumulate")
                 .view(
-                        input(person, () -> persons),
+                        input(person),
                         accumulate(expr(person, p -> p.getName().startsWith("M")),
                                    sum(Person::getAge).as(resultSum),
                                    avg(Person::getAge).as(resultAvg))
@@ -163,8 +145,6 @@ public class FlowTest {
 
     @Test
     public void testInlineInvocation() {
-        DataSource persons = storeOf();
-
         Result result = new Result();
 
         Variable<Person> mark = bind(typeOf(Person.class));
@@ -172,7 +152,7 @@ public class FlowTest {
 
         Rule rule = rule("SyncInvocation")
                 .view(
-                        input(mark, () -> persons),
+                        input(mark),
                         expr(mark, person -> person.getName().equals("Mark")),
                         set(age).invoking(mark, FlowTest::findAge)
                      )
@@ -196,14 +176,12 @@ public class FlowTest {
     public void testInlineInvocationIterable() {
         List<String> result = new ArrayList<String>();
 
-        DataSource persons = storeOf();
-
         Variable<Person> mario = bind(typeOf(Person.class));
         Variable<Person> parent = bind(typeOf(Person.class));
 
         Rule rule = rule("SyncInvocation")
                 .view(
-                        input(mario, () -> persons),
+                        input(mario),
                         expr(mario, person -> person.getName().equals("Mario")),
                         set(parent).in(mario, Person::getParents)
                      )

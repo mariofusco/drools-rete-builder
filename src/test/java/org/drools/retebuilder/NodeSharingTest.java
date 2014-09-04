@@ -7,12 +7,8 @@ import org.drools.core.reteoo.Sink;
 import org.drools.model.Rule;
 import org.drools.model.Variable;
 import org.junit.Test;
-import org.kie.api.runtime.KieSession;
 
 import static org.drools.model.DSL.*;
-import static org.drools.model.flow.FlowDSL.expr;
-import static org.drools.model.flow.FlowDSL.input;
-import static org.drools.retebuilder.ReteDumper.dumpRete;
 import static org.junit.Assert.assertEquals;
 
 public class NodeSharingTest {

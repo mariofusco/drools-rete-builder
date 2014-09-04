@@ -29,15 +29,13 @@ import org.drools.core.spi.ObjectType;
 import org.drools.model.AccumulatePattern;
 import org.drools.model.Condition;
 import org.drools.model.Constraint;
-import org.drools.model.DataSource;
-import org.drools.model.DataStream;
+import org.drools.model.DataSourceDefinition;
 import org.drools.model.ExistentialPattern;
 import org.drools.model.InvokerPattern;
 import org.drools.model.Pattern;
 import org.drools.model.Rule;
 import org.drools.model.SingleConstraint;
 import org.drools.model.Variable;
-import org.drools.model.functions.Function0;
 import org.drools.retebuilder.adapters.AccumulateAdapter;
 import org.drools.retebuilder.adapters.FromAdapter;
 import org.drools.retebuilder.adapters.RuleImplAdapter;
@@ -49,7 +47,6 @@ import org.drools.retebuilder.nodes.DataStreamNode;
 import org.drools.retebuilder.nodes.SyncInvokerNode;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,9 +57,9 @@ public class CanonicalReteBuilder {
     private final CanonicalKieBase kieBase;
     private final ReteooBuilder.IdGenerator idGenerator;
 
-    private final Map<DataSource, EntryPointNode> entryPoints = new HashMap<DataSource, EntryPointNode>();
+    private final Map<String, EntryPointNode> entryPoints = new HashMap<String, EntryPointNode>();
 
-    private final Map<Variable, DataStreamNode> streamNodes = new HashMap<Variable, DataStreamNode>();
+    private final Map<String, DataStreamNode> streamNodes = new HashMap<String, DataStreamNode>();
 
     private final BuildUtils utils = new BuildUtils();
 
@@ -75,8 +72,8 @@ public class CanonicalReteBuilder {
         return idGenerator;
     }
 
-    Collection<DataStreamNode> getDataStreamNodes() {
-        return streamNodes.values();
+    DataStreamNode getDataStreamNode(String name) {
+        return streamNodes.get(name);
     }
 
     public void addRule(Rule rule) {
@@ -121,21 +118,19 @@ public class CanonicalReteBuilder {
             createLeftInputAdapterNode(context);
         }
 
-        // TODO: avoid applying the supplier to check if the DataSource is a DataStream
-        DataSource dataSource = pattern.getDataSourceSupplier().apply();
+        DataSourceDefinition dataSourceDef = pattern.getDataSourceDefinition();
 
-        if (dataSource instanceof DataStream) {
+        if (dataSourceDef.isObservable()) {
             Variable var = pattern.getPatternVariable();
             DataStreamNode dataStreamNode = streamNodes.get(var);
             if (dataStreamNode == null) {
-                dataStreamNode = new DataStreamNode(new ClassObjectType(pattern.getPatternVariable().getType().asClass()),
-                                                    context,
-                                                    (Function0<DataStream>)pattern.getDataSourceSupplier());
-                streamNodes.put(var, dataStreamNode);
+                ObjectType objectType = new ClassObjectType(pattern.getPatternVariable().getType().asClass());
+                dataStreamNode = new DataStreamNode(objectType, context, dataSourceDef);
+                streamNodes.put(dataSourceDef.getName(), dataStreamNode);
             }
             context.setObjectSource( dataStreamNode );
         } else {
-            context.setObjectSource( getEntryPoint(context, pattern, dataSource) );
+            context.setObjectSource( getEntryPoint(context, pattern, dataSourceDef) );
             createObjectTypeNode(context, pattern.getPatternVariable().getType().asClass());
         }
 
@@ -280,12 +275,12 @@ public class CanonicalReteBuilder {
                                                false );
     }
 
-    private EntryPointNode getEntryPoint(CanonicalBuildContext context, Pattern pattern, DataSource dataSource) {
+    private EntryPointNode getEntryPoint(CanonicalBuildContext context, Pattern pattern, DataSourceDefinition dataSourceDef) {
         if (true) { // TODO now it always returns default entry point
             return context.getKnowledgeBase().getRete().getEntryPointNode( EntryPointId.DEFAULT );
         }
 
-        EntryPointNode epn = entryPoints.get(dataSource);
+        EntryPointNode epn = entryPoints.get(dataSourceDef.getName());
         if (epn == null) {
             epn = kieBase.getNodeFactory().buildEntryPointNode( idGenerator.getNextId(),
                                                                 RuleBasePartitionId.MAIN_PARTITION,
@@ -293,7 +288,7 @@ public class CanonicalReteBuilder {
                                                                 kieBase.getRete(),
                                                                 EntryPointId.DEFAULT );
             epn.attach();
-            entryPoints.put(dataSource, epn);
+            entryPoints.put(dataSourceDef.getName(), epn);
         }
         return epn;
     }

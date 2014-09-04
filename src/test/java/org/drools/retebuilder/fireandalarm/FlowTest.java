@@ -12,9 +12,6 @@ import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.rule.FactHandle;
 
 import static org.drools.model.DSL.*;
-import static org.drools.model.flow.FlowDSL.exists;
-import static org.drools.model.flow.FlowDSL.*;
-import static org.drools.model.flow.FlowDSL.not;
 import static org.junit.Assert.assertTrue;
 
 public class FlowTest {
