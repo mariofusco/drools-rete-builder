@@ -1,8 +1,10 @@
 package org.drools.retebuilder;
 
+import org.drools.datasource.DataStore;
 import org.drools.datasource.DataStream;
 import org.drools.model.Rule;
 import org.drools.model.Variable;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kie.api.runtime.KieSession;
 
@@ -41,6 +43,36 @@ public class DataSourceTest {
         persons.send(new Person("Mark", 37));
         persons.send(new Person("Edson", 35));
         persons.send(new Person("Mario", 40));
+
+        ksession.fireAllRules();
+        assertEquals("Mark is 37 years old", result.get());
+    }
+
+    @Test @Ignore
+    public void testDataStore() {
+        AtomicReference<String> result = new AtomicReference<String>();
+
+        Variable<Person> mark = bind(typeOf(Person.class));
+        Variable<Integer> age = bind(typeOf(Integer.class));
+
+        Rule rule = rule("R")
+                .view(
+                        input(mark, "persons"),
+                        expr(mark, person -> person.getName().equals("Mark")),
+                        set(age).invoking(mark, Person::getAge)
+                     )
+                .then(on(mark, age)
+                              .execute((m, a) -> result.set( m + " is " + a + " years old" )));
+
+        CanonicalKieBase kieBase = new CanonicalKieBase();
+        kieBase.addRules(rule);
+
+        KieSession ksession = kieBase.newKieSession();
+
+        DataStore persons = storeOf(new Person("Mark", 37),
+                                    new Person("Edson", 35),
+                                    new Person("Mario", 40));
+        bindDataSource(ksession, "persons", persons);
 
         ksession.fireAllRules();
         assertEquals("Mark is 37 years old", result.get());
