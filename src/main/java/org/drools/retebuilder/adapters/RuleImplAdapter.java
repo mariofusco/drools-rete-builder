@@ -5,6 +5,7 @@ import org.drools.core.common.InternalFactHandle;
 import org.drools.core.definitions.rule.impl.RuleImpl;
 import org.drools.core.spi.Consequence;
 import org.drools.core.spi.KnowledgeHelper;
+import org.drools.model.Drools;
 import org.drools.model.Rule;
 import org.drools.model.Variable;
 import org.drools.model.functions.FunctionN;
@@ -42,10 +43,21 @@ public class RuleImplAdapter extends RuleImpl {
         public void evaluate(KnowledgeHelper knowledgeHelper, WorkingMemory workingMemory) throws Exception {
             Variable[] consequenceDeclarations = consequence.getDeclarations();
             InternalFactHandle[] factHandles = knowledgeHelper.getTuple().toFactHandles();
-            Object[] facts = new Object[consequenceDeclarations.length];
-            for (int i = 0; i < facts.length; i++) {
-                facts[i] = context.getVariableMapper(consequenceDeclarations[i]).getFact(factHandles);
+
+            Object[] facts;
+            int i = 0;
+            if (consequence.isUsingDrools()) {
+                facts = new Object[consequenceDeclarations.length+1];
+                facts[0] = new DroolsImpl(knowledgeHelper);
+                i++;
+            } else {
+                facts = new Object[consequenceDeclarations.length];
             }
+
+            for (int j = 0; j < consequenceDeclarations.length; i++, j++) {
+                facts[i] = context.getVariableMapper(consequenceDeclarations[j]).getFact(factHandles);
+            }
+
             consequence.getBlock().execute(facts);
 
             for (org.drools.model.Consequence.Update update : consequence.getUpdates()) {
@@ -63,6 +75,29 @@ public class RuleImplAdapter extends RuleImpl {
                 InternalFactHandle deletedFactHandle = context.getVariableMapper(delete).getFactHandle(factHandles);
                 knowledgeHelper.delete(deletedFactHandle);
             }
+        }
+    }
+
+    public static class DroolsImpl implements Drools {
+        private final KnowledgeHelper knowledgeHelper;
+
+        public DroolsImpl(KnowledgeHelper knowledgeHelper) {
+            this.knowledgeHelper = knowledgeHelper;
+        }
+
+        @Override
+        public void insert(Object object) {
+            knowledgeHelper.insert(object);
+        }
+
+        @Override
+        public void update(Object object) {
+            knowledgeHelper.update(object);
+        }
+
+        @Override
+        public void delete(Object object) {
+            knowledgeHelper.delete(object);
         }
     }
 }

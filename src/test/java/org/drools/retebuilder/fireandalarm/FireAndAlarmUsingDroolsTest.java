@@ -14,10 +14,10 @@ import org.kie.api.runtime.rule.FactHandle;
 import static org.drools.model.DSL.*;
 import static org.junit.Assert.assertTrue;
 
-public class FlowTest {
+public class FireAndAlarmUsingDroolsTest {
 
     @Test
-    public void testFireAndAlarm() {
+    public void testFireAndAlarmUsingDroolsInConsequences() {
 
         Variable<Room> room = any(Room.class);
         Variable<Fire> fire = any(Fire.class);
@@ -33,11 +33,11 @@ public class FlowTest {
                      )
                 .then(
                         on(sprinkler)
-                            .execute(s -> {
-                                System.out.println("Turn on the sprinkler for room " + s.getRoom().getName());
-                                s.setOn(true);
-                            })
-                            .update(sprinkler, "on")
+                                .execute((drools, s) -> {
+                                    System.out.println("Turn on the sprinkler for room " + s.getRoom().getName());
+                                    s.setOn(true);
+                                    drools.update(s);
+                                })
                      );
 
         Rule r2 = rule("When the fire is gone turn off the sprinkler")
@@ -49,11 +49,11 @@ public class FlowTest {
                      )
                 .then(
                         on(sprinkler)
-                            .execute(s -> {
-                                System.out.println("Turn off the sprinkler for room " + s.getRoom().getName());
-                                s.setOn(false);
-                            })
-                            .update(sprinkler, "on")
+                                .execute((drools, s) -> {
+                                    System.out.println("Turn off the sprinkler for room " + s.getRoom().getName());
+                                    s.setOn(false);
+                                    drools.update(s);
+                                })
                      );
 
         Rule r3 = rule("Raise the alarm when we have one or more fires")
@@ -62,8 +62,10 @@ public class FlowTest {
                         exists(fire)
                      )
                 .then(
-                        execute(() -> System.out.println("Raise the alarm"))
-                            .insert(() -> new Alarm())
+                        execute(drools -> {
+                            System.out.println("Raise the alarm");
+                            drools.insert(new Alarm());
+                        })
                      );
 
         Rule r4 = rule("Lower the alarm when all the fires have gone")
@@ -73,8 +75,11 @@ public class FlowTest {
                         input(alarm)
                      )
                 .then(
-                        execute(() -> System.out.println("Lower the alarm"))
-                            .delete(alarm)
+                        on(alarm)
+                                .execute((drools, a) -> {
+                                    System.out.println("Lower the alarm");
+                                    drools.delete(a);
+                                })
                      );
 
         Rule r5 = rule("Status output when things are ok")
