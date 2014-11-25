@@ -22,9 +22,7 @@ public class AsyncInvokerNode extends LeftTupleSource implements LeftTupleSinkNo
     public AsyncInvokerNode(int id,
                             LeftTupleSource tupleSource,
                             BuildContext context) {
-        super(id,
-              context.getPartitionId(),
-              context.getKnowledgeBase().getConfiguration().isMultithreadEvaluation());
+        super(id, context);
         setLeftTupleSource(tupleSource);
 
         initMasks(context, tupleSource);
