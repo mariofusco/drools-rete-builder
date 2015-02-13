@@ -53,17 +53,20 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
                                                                    this.rete,
                                                                    EntryPointId.DEFAULT );
         epn.attach();
+        this.reteBuilder.registerEntryPoint(EntryPointId.DEFAULT, epn);
 
         BuildContext context = new BuildContext( this, reteooBuilder.getIdGenerator() );
         context.setCurrentEntryPoint( epn.getEntryPoint() );
         context.setTupleMemoryEnabled( true );
         context.setObjectTypeNodeMemoryEnabled( true );
 
-        ObjectTypeNode otn = getNodeFactory().buildObjectTypeNode( this.reteooBuilder.getIdGenerator().getNextId(),
-                                                                   epn,
-                                                                   ClassObjectType.InitialFact_ObjectType,
-                                                                   context );
+        ObjectTypeNode otn = getNodeFactory().buildObjectTypeNode(this.reteooBuilder.getIdGenerator().getNextId(),
+                                                                  epn,
+                                                                  ClassObjectType.InitialFact_ObjectType,
+                                                                  context );
         otn.attach(context);
+
+
     }
 
     @Override

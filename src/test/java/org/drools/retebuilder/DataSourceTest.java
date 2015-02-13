@@ -4,7 +4,6 @@ import org.drools.datasource.DataStore;
 import org.drools.datasource.DataStream;
 import org.drools.model.Rule;
 import org.drools.model.Variable;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.kie.api.runtime.KieSession;
 
@@ -48,7 +47,7 @@ public class DataSourceTest {
         assertEquals("Mark is 37 years old", result.get());
     }
 
-    @Test @Ignore
+    @Test
     public void testDataStore() {
         AtomicReference<String> result = new AtomicReference<String>();
 

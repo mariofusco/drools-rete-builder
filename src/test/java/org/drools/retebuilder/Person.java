@@ -6,6 +6,8 @@ public class Person {
     private String name;
     private int age;
 
+    private String town;
+
     private List<Person> parents;
 
     public Person() { }
@@ -13,6 +15,16 @@ public class Person {
     public Person(String name, int age) {
         this.name = name;
         this.age = age;
+    }
+
+    public Person(String name, int age, String town) {
+        this.name = name;
+        this.age = age;
+        this.town = town;
+    }
+
+    public String getTown() {
+        return town;
     }
 
     public String getName() {

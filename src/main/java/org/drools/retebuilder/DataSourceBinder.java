@@ -1,9 +1,11 @@
 package org.drools.retebuilder;
 
 import org.drools.datasource.DataSource;
+import org.drools.datasource.DataStore;
 import org.drools.datasource.Observable;
 import org.drools.retebuilder.nodes.DataStreamNode;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.rule.EntryPoint;
 
 public class DataSourceBinder {
 
@@ -16,7 +18,13 @@ public class DataSourceBinder {
             }
             streamNode.registerDataStreamObserver(kSession, (Observable)dataSource);
         } else {
-            throw new RuntimeException("binding of passive DataSource still unsopported");
+            EntryPoint entryPoint = kSession.getEntryPoint(dataSourceName);
+            if (entryPoint == null) {
+                throw new RuntimeException("Unknown data source: " + dataSourceName);
+            }
+            for (Object obj : ((DataStore) dataSource).getObjects()) {
+                entryPoint.insert(obj);
+            }
         }
     }
 }

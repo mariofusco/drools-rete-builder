@@ -121,16 +121,18 @@ public class CanonicalReteBuilder {
         DataSourceDefinition dataSourceDef = pattern.getDataSourceDefinition();
 
         if (dataSourceDef.isObservable()) {
-            Variable var = pattern.getPatternVariable();
-            DataStreamNode dataStreamNode = streamNodes.get(var);
+            ObjectType objectType = new ClassObjectType(pattern.getPatternVariable().getType().asClass());
+            context.setLastBuiltPattern( new org.drools.core.rule.Pattern(context.getCurrentPatternOffset(), objectType) );
+            DataStreamNode dataStreamNode = streamNodes.get(dataSourceDef.getName());
             if (dataStreamNode == null) {
-                ObjectType objectType = new ClassObjectType(pattern.getPatternVariable().getType().asClass());
                 dataStreamNode = new DataStreamNode(objectType, context, dataSourceDef);
                 streamNodes.put(dataSourceDef.getName(), dataStreamNode);
             }
             context.setObjectSource( dataStreamNode );
         } else {
-            context.setObjectSource( getEntryPoint(context, pattern, dataSourceDef) );
+            EntryPointNode epn = getEntryPoint(context, pattern, dataSourceDef);
+            context.setObjectSource( epn );
+            context.setCurrentEntryPoint( epn.getEntryPoint() );
             createObjectTypeNode(context, pattern.getPatternVariable().getType().asClass());
         }
 
@@ -276,17 +278,13 @@ public class CanonicalReteBuilder {
     }
 
     private EntryPointNode getEntryPoint(CanonicalBuildContext context, Pattern pattern, DataSourceDefinition dataSourceDef) {
-        if (true) { // TODO now it always returns default entry point
-            return context.getKnowledgeBase().getRete().getEntryPointNode( EntryPointId.DEFAULT );
-        }
-
         EntryPointNode epn = entryPoints.get(dataSourceDef.getName());
         if (epn == null) {
             epn = kieBase.getNodeFactory().buildEntryPointNode( idGenerator.getNextId(),
                                                                 RuleBasePartitionId.MAIN_PARTITION,
                                                                 kieBase.getConfiguration().isMultithreadEvaluation(),
                                                                 kieBase.getRete(),
-                                                                EntryPointId.DEFAULT );
+                                                                new EntryPointId(dataSourceDef.getName()) );
             epn.attach();
             entryPoints.put(dataSourceDef.getName(), epn);
         }
@@ -324,5 +322,9 @@ public class CanonicalReteBuilder {
             context.setTupleSource( (LeftTupleSource) utils.attachNode( context, lia ) );
             context.setObjectSource(null);
         }
+    }
+
+    void registerEntryPoint(EntryPointId entryPointId, EntryPointNode epn) {
+        entryPoints.put(entryPointId.getEntryPointId(), epn);
     }
 }
