@@ -1,12 +1,15 @@
 package org.drools.retebuilder;
 
 import org.drools.core.RuleBaseConfiguration;
+import org.drools.core.base.ClassObjectType;
 import org.drools.core.common.RuleBasePartitionId;
 import org.drools.core.impl.KnowledgeBaseImpl;
 import org.drools.core.reteoo.EntryPointNode;
 import org.drools.core.reteoo.KieComponentFactory;
+import org.drools.core.reteoo.ObjectTypeNode;
 import org.drools.core.reteoo.Rete;
 import org.drools.core.reteoo.ReteooBuilder;
+import org.drools.core.reteoo.builder.BuildContext;
 import org.drools.core.reteoo.builder.NodeFactory;
 import org.drools.core.rule.EntryPointId;
 import org.drools.model.Rule;
@@ -50,6 +53,17 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
                                                                    this.rete,
                                                                    EntryPointId.DEFAULT );
         epn.attach();
+
+        BuildContext context = new BuildContext( this, reteooBuilder.getIdGenerator() );
+        context.setCurrentEntryPoint( epn.getEntryPoint() );
+        context.setTupleMemoryEnabled( true );
+        context.setObjectTypeNodeMemoryEnabled( true );
+
+        ObjectTypeNode otn = getNodeFactory().buildObjectTypeNode( this.reteooBuilder.getIdGenerator().getNextId(),
+                                                                   epn,
+                                                                   ClassObjectType.InitialFact_ObjectType,
+                                                                   context );
+        otn.attach(context);
     }
 
     @Override
