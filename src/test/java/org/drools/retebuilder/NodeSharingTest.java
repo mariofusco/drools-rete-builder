@@ -21,7 +21,7 @@ public class NodeSharingTest {
         Rule r1 = rule("alpha")
                 .when(
                         p -> p.filter(mark)
-                              .with("isMark", person -> person.getName().equals("Mark"))
+                              .with(person -> person.getName().equals("Mark"))
                      )
                 .then(
                         on(mark)
@@ -31,7 +31,7 @@ public class NodeSharingTest {
         Rule r2 = rule("beta")
                 .when(
                         p -> p.filter(mark)
-                              .with("isMark", person -> person.getName().equals("Mark")),
+                              .with(person -> person.getName().equals("Mark")),
                         p -> p.filter(older)
                               .with(older, mark, (p1, p2) -> p1.getAge() > p2.getAge())
                      )
@@ -65,7 +65,7 @@ public class NodeSharingTest {
         Rule r1 = rule("alpha")
                 .view(
                         input(markV),
-                        expr("isMark", markV, mark -> mark.getName().equals("Mark"))
+                        expr(markV, mark -> mark.getName().equals("Mark"))
                      )
                 .then(
                         on(markV)
@@ -76,7 +76,7 @@ public class NodeSharingTest {
                 .view(
                         input(markV),
                         input(olderV),
-                        expr("isMark", markV, mark -> mark.getName().equals("Mark")),
+                        expr(markV, mark -> mark.getName().equals("Mark")),
                         expr(olderV, markV, (older, mark) -> older.getAge() > mark.getAge())
                      )
                 .then(
