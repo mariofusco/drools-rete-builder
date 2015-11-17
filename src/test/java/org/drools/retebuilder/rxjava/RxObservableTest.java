@@ -17,8 +17,8 @@ import static org.drools.retebuilder.rxjava.RxObservable.bindRxObservable;
 public class RxObservableTest {
     @Test
     public void testDataStream() {
-        Variable<TempInfo> temp = bind(typeOf(TempInfo.class));
-        Variable<Person> person = bind(typeOf(Person.class));
+        Variable<TempInfo> temp = any( TempInfo.class );
+        Variable<Person> person = any( Person.class );
 
         Rule r1 = rule("low temp")
                 .view(
@@ -50,8 +50,8 @@ public class RxObservableTest {
                                     new Person("Mario", 40, "Milano"));
         bindDataSource(ksession, "persons", persons);
 
-        Observable<TempInfo> tempFeed = TempServer.getFeeds("Milano", "London", "Toronto");
-        bindRxObservable(ksession, "tempFeed", tempFeed);
+        Observable<TempInfo> tempFeed = TempServer.getFeeds( "Milano", "London", "Toronto" );
+        bindRxObservable( ksession, "tempFeed", tempFeed );
 
         tempFeed.subscribe(new Observer<TempInfo>() {
             @Override

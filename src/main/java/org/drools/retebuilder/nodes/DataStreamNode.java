@@ -121,7 +121,7 @@ public class DataStreamNode extends ObjectTypeNode {
             dataStreamNode.sink.propagateAssertObject( factHandle,
                                                        pctx,
                                                        workingMemory );
-
+            workingMemory.notifyHalt();
             return true;
         }
 

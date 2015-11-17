@@ -1,10 +1,10 @@
 package org.drools.retebuilder.constraints;
 
-import org.drools.core.WorkingMemory;
+import org.drools.core.common.InternalWorkingMemory;
+import org.drools.core.reteoo.LeftTuple;
 import org.drools.core.rule.Declaration;
 import org.drools.core.spi.DataProvider;
 import org.drools.core.spi.PropagationContext;
-import org.drools.core.spi.Tuple;
 import org.drools.model.InvokerMultiValuePattern;
 import org.drools.model.InvokerPattern;
 import org.drools.model.InvokerSingleValuePattern;
@@ -36,7 +36,7 @@ public class LambdaDataProvider<T> implements DataProvider {
     }
 
     @Override
-    public Iterator getResults(Tuple tuple, WorkingMemory wm, PropagationContext ctx, Object providerContext) {
+    public Iterator getResults( LeftTuple tuple, InternalWorkingMemory wm, PropagationContext ctx, Object providerContext ) {
         if (pattern.isMultiValue()) {
             return ((InvokerMultiValuePattern<T>)pattern).getInvokedFunction().apply( getInvocationArgs(argsPos, null, tuple) ).iterator();
         } else {

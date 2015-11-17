@@ -26,18 +26,18 @@ public class FireAndAlarmTest {
 
         Rule r1 = rule("When there is a fire turn on the sprinkler")
                 .view(
-                        input(fire),
-                        input(sprinkler),
-                        expr(sprinkler, s -> !s.isOn()),
-                        expr(sprinkler, fire, (s, f) -> s.getRoom().equals(f.getRoom()))
+                        input( fire ),
+                        input( sprinkler ),
+                        expr( sprinkler, s -> !s.isOn() ),
+                        expr( sprinkler, fire, ( s, f ) -> s.getRoom().equals( f.getRoom() ) )
                      )
                 .then(
-                        on(sprinkler)
-                            .execute(s -> {
-                                System.out.println("Turn on the sprinkler for room " + s.getRoom().getName());
-                                s.setOn(true);
-                            })
-                            .update(sprinkler, "on")
+                        on( sprinkler )
+                                .execute( s -> {
+                                    System.out.println( "Turn on the sprinkler for room " + s.getRoom().getName() );
+                                    s.setOn( true );
+                                } )
+                                .update( sprinkler, "on" )
                      );
 
         Rule r2 = rule("When the fire is gone turn off the sprinkler")

@@ -22,6 +22,7 @@ public class RxObservable<T> extends AbstractObservable implements ReactiveDataS
 
             @Override
             public void onNext(T o) {
+                System.out.println("insert -> " + o);
                 notifyInsert(o);
             }
         });
