@@ -12,6 +12,7 @@ import org.drools.core.reteoo.ObjectTypeNode;
 import org.drools.core.reteoo.ReteooBuilder;
 import org.drools.core.reteoo.RightTuple;
 import org.drools.core.reteoo.RuleRemovalContext;
+import org.drools.core.reteoo.Sink;
 import org.drools.core.reteoo.builder.BuildContext;
 import org.drools.core.spi.PropagationContext;
 
@@ -64,28 +65,28 @@ public class AsyncInvokerNode extends LeftTupleSource implements LeftTupleSinkNo
     }
 
     @Override
-    public LeftTuple createLeftTuple(InternalFactHandle factHandle, LeftTupleSink sink, boolean leftTupleMemoryEnabled) {
-        throw new UnsupportedOperationException("org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO");
+    public LeftTuple createLeftTuple( InternalFactHandle factHandle, Sink sink, boolean leftTupleMemoryEnabled ) {
+        throw new UnsupportedOperationException( "org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO" );
     }
 
     @Override
-    public LeftTuple createLeftTuple(InternalFactHandle factHandle, LeftTuple leftTuple, LeftTupleSink sink) {
-        throw new UnsupportedOperationException("org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO");
+    public LeftTuple createLeftTuple( InternalFactHandle factHandle, LeftTuple leftTuple, Sink sink ) {
+        throw new UnsupportedOperationException( "org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO" );
     }
 
     @Override
-    public LeftTuple createLeftTuple(LeftTuple leftTuple, LeftTupleSink sink, PropagationContext pctx, boolean leftTupleMemoryEnabled) {
-        throw new UnsupportedOperationException("org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO");
+    public LeftTuple createLeftTuple( LeftTuple leftTuple, Sink sink, PropagationContext pctx, boolean leftTupleMemoryEnabled ) {
+        throw new UnsupportedOperationException( "org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO" );
     }
 
     @Override
-    public LeftTuple createLeftTuple(LeftTuple leftTuple, RightTuple rightTuple, LeftTupleSink sink) {
-        throw new UnsupportedOperationException("org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO");
+    public LeftTuple createLeftTuple( LeftTuple leftTuple, RightTuple rightTuple, Sink sink ) {
+        throw new UnsupportedOperationException( "org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO" );
     }
 
     @Override
-    public LeftTuple createLeftTuple(LeftTuple leftTuple, RightTuple rightTuple, LeftTuple currentLeftChild, LeftTuple currentRightChild, LeftTupleSink sink, boolean leftTupleMemoryEnabled) {
-        throw new UnsupportedOperationException("org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO");
+    public LeftTuple createLeftTuple( LeftTuple leftTuple, RightTuple rightTuple, LeftTuple currentLeftChild, LeftTuple currentRightChild, Sink sink, boolean leftTupleMemoryEnabled ) {
+        throw new UnsupportedOperationException( "org.drools.retebuilder.nodes.AsyncInvokerNode.createLeftTuple -> TODO" );
     }
 
     @Override

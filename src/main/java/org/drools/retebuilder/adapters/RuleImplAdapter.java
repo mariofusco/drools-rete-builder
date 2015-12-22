@@ -1,7 +1,6 @@
 package org.drools.retebuilder.adapters;
 
 import org.drools.core.WorkingMemory;
-import org.drools.core.common.InternalFactHandle;
 import org.drools.core.definitions.rule.impl.RuleImpl;
 import org.drools.core.spi.Consequence;
 import org.drools.core.spi.KnowledgeHelper;
@@ -42,7 +41,7 @@ public class RuleImplAdapter extends RuleImpl {
         @Override
         public void evaluate(KnowledgeHelper knowledgeHelper, WorkingMemory workingMemory) throws Exception {
             Variable[] consequenceDeclarations = consequence.getDeclarations();
-            InternalFactHandle[] factHandles = knowledgeHelper.getTuple().toFactHandles();
+            Object[] objs = knowledgeHelper.getTuple().toObjects();
 
             Object[] facts;
             int i = 0;
@@ -55,13 +54,13 @@ public class RuleImplAdapter extends RuleImpl {
             }
 
             for (int j = 0; j < consequenceDeclarations.length; i++, j++) {
-                facts[i] = context.getVariableMapper(consequenceDeclarations[j]).getFact(factHandles);
+                facts[i] = context.getVariableMapper(consequenceDeclarations[j]).getFact(objs);
             }
 
             consequence.getBlock().execute(facts);
 
             for (org.drools.model.Consequence.Update update : consequence.getUpdates()) {
-                Object updatedFact = context.getVariableMapper(update.getUpdatedVariable()).getFactHandle(factHandles).getObject();
+                Object updatedFact = context.getVariableMapper(update.getUpdatedVariable()).getFact(objs);
                 // TODO the Update specs has the changed fields so use update(FactHandle newObject, long mask, Class<?> modifiedClass) instead
                 knowledgeHelper.update(updatedFact);
             }
@@ -72,8 +71,8 @@ public class RuleImplAdapter extends RuleImpl {
             }
 
             for (Variable delete : consequence.getDeletes()) {
-                InternalFactHandle deletedFactHandle = context.getVariableMapper(delete).getFactHandle(factHandles);
-                knowledgeHelper.delete(deletedFactHandle);
+                Object deletedFact = context.getVariableMapper(delete).getFact(objs);
+                knowledgeHelper.delete(deletedFact);
             }
         }
     }

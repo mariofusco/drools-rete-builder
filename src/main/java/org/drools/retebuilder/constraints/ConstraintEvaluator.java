@@ -1,7 +1,7 @@
 package org.drools.retebuilder.constraints;
 
 import org.drools.core.common.InternalFactHandle;
-import org.drools.core.reteoo.LeftTuple;
+import org.drools.core.spi.Tuple;
 import org.drools.model.Pattern;
 import org.drools.model.SingleConstraint;
 import org.drools.model.functions.PredicateN;
@@ -21,8 +21,12 @@ public class ConstraintEvaluator {
         this.argsPos = findArgsPos(pattern, constraint.getVariables());
     }
 
-    public boolean evaluate(InternalFactHandle handle, LeftTuple leftTuple) {
-        return predicate.test(getInvocationArgs(argsPos, handle, leftTuple));
+    public boolean evaluate(InternalFactHandle handle) {
+        return predicate.test(handle.getObject());
+    }
+
+    public boolean evaluate(InternalFactHandle handle, Tuple tuple) {
+        return predicate.test(getInvocationArgs(argsPos, handle, tuple));
     }
 
     @Override

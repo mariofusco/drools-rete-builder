@@ -34,7 +34,7 @@ public final class EvaluationUtil {
     public static Object[] getInvocationArgs(int[] argsPos, InternalFactHandle handle, Tuple tuple) {
         Object[] params = new Object[argsPos.length];
         for (int i = 0; i < params.length; i++) {
-            params[i] = argsPos[i] >= 0 ? tuple.get(argsPos[i]).getObject() : handle.getObject();
+            params[i] = argsPos[i] >= 0 ? tuple.getObject(argsPos[i]) : handle.getObject();
         }
         return params;
     }

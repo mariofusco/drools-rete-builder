@@ -1,7 +1,8 @@
 package org.drools.retebuilder.nodes;
 
 import org.drools.core.common.InternalWorkingMemory;
-import org.drools.core.common.LeftTupleSets;
+import org.drools.core.common.TupleSets;
+import org.drools.core.reteoo.LeftTuple;
 import org.drools.core.reteoo.LeftTupleSink;
 import org.drools.core.reteoo.PathMemory;
 import org.drools.core.reteoo.SegmentMemory;
@@ -14,9 +15,9 @@ public class PhreakAsyncInvokerNode {
                        SegmentMemory smem,
                        LeftTupleSink sink,
                        InternalWorkingMemory wm,
-                       LeftTupleSets srcLeftTuples,
-                       LeftTupleSets trgLeftTuples,
-                       LeftTupleSets stagedLeftTuples) {
+                       TupleSets<LeftTuple> srcLeftTuples,
+                       TupleSets<LeftTuple> trgLeftTuples,
+                       TupleSets<LeftTuple> stagedLeftTuples) {
 
     }
 }

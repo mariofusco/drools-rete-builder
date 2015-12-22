@@ -13,14 +13,13 @@ import org.drools.core.rule.EntryPointId;
 import org.drools.core.spi.FactHandleFactory;
 import org.drools.core.spi.ObjectType;
 import org.drools.core.spi.PropagationContext;
-import org.drools.core.spi.RuleComponent;
+import org.drools.core.util.Bag;
 import org.drools.datasource.DataSourceObserver;
 import org.drools.datasource.Observable;
 import org.drools.model.DataSourceDefinition;
 import org.kie.api.definition.rule.Rule;
 import org.kie.api.runtime.KieSession;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 public class DataStreamNode extends ObjectTypeNode {
@@ -34,7 +33,7 @@ public class DataStreamNode extends ObjectTypeNode {
         this.id = context.getNextId();
         this.partitionId = context.getPartitionId();
         this.partitionsEnabled = context.getKnowledgeBase().getConfiguration().isMultithreadEvaluation();
-        this.associations = new HashMap<Rule, RuleComponent>();
+        this.associations = new Bag<Rule>();
 
         this.sink = EmptyObjectSinkAdapter.getInstance();
         this.objectType = objectType;
@@ -121,7 +120,7 @@ public class DataStreamNode extends ObjectTypeNode {
             dataStreamNode.sink.propagateAssertObject( factHandle,
                                                        pctx,
                                                        workingMemory );
-            workingMemory.notifyHalt();
+            workingMemory.notifyWaitOnRest();
             return true;
         }
 

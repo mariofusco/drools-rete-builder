@@ -4,19 +4,10 @@ import rx.Observable;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 public class TempServer {
-
-    public static Observable<TempInfo> getTemp1(String... towns) {
-        return Observable.from(Stream.of(towns).map(town -> TempInfo.fetch(town)).collect(toList()));
-    }
-
-    public static Observable<TempInfo> getTemp(String town) {
-        return Observable.create(subscriber -> subscriber.onNext(TempInfo.fetch(town)));
-    }
 
     public static Observable<TempInfo> getFeed(String town) {
         return Observable.create(subscriber ->
@@ -35,9 +26,5 @@ public class TempServer {
         return Observable.merge(Arrays.stream(towns)
                                       .map(TempServer::getFeed)
                                       .collect(toList()));
-    }
-
-    private static void sleep(int ms) {
-        try { Thread.sleep(ms); } catch(Exception ex) {}
     }
 }

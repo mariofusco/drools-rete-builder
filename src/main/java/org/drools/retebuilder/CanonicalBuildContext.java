@@ -1,6 +1,5 @@
 package org.drools.retebuilder;
 
-import org.drools.core.common.InternalFactHandle;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.reteoo.ReteooBuilder;
 import org.drools.core.reteoo.builder.BuildContext;
@@ -51,13 +50,9 @@ public class CanonicalBuildContext extends BuildContext {
             this.declarationPos = declarationPos;
         }
 
-        public Object getFact(InternalFactHandle[] factHandles) {
-            Object fact = factHandles[factHandlePos].getObject();
+        public Object getFact(Object[] objs) {
+            Object fact = objs[factHandlePos];
             return fact instanceof Object[] ? ((Object[])fact)[declarationPos] : fact;
-        }
-
-        public InternalFactHandle getFactHandle(InternalFactHandle[] factHandles) {
-            return factHandles[factHandlePos];
         }
     }
 }
