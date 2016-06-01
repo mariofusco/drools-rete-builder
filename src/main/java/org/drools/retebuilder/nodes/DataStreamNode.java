@@ -45,11 +45,6 @@ public class DataStreamNode extends ObjectTypeNode {
     }
 
     @Override
-    public int hashCode() {
-        return this.objectType.hashCode();
-    }
-
-    @Override
     public boolean equals(final Object object) {
         if ( this == object ) {
             return true;

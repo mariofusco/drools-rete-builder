@@ -45,7 +45,7 @@ public class NodeSharingTest {
 
         EntryPointNode epNode = kieBase.getRete().getEntryPointNodes().values().iterator().next();
         ObjectTypeNode otn = epNode.getObjectTypeNodes().values().iterator().next();
-        Sink[] sinks = otn.getSinkPropagator().getSinks();
+        Sink[] sinks = otn.getObjectSinkPropagator().getSinks();
 
         int alphaCounter = 0;
         for (Sink sink : sinks) {
@@ -89,7 +89,7 @@ public class NodeSharingTest {
 
         EntryPointNode epNode = kieBase.getRete().getEntryPointNodes().values().iterator().next();
         ObjectTypeNode otn = epNode.getObjectTypeNodes().values().iterator().next();
-        Sink[] sinks = otn.getSinkPropagator().getSinks();
+        Sink[] sinks = otn.getObjectSinkPropagator().getSinks();
 
         int alphaCounter = 0;
         for (Sink sink : sinks) {
