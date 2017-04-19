@@ -1,5 +1,7 @@
 package org.drools.retebuilder;
 
+import java.util.UUID;
+
 import org.drools.core.RuleBaseConfiguration;
 import org.drools.core.base.ClassObjectType;
 import org.drools.core.common.RuleBasePartitionId;
@@ -17,8 +19,6 @@ import org.drools.retebuilder.adapters.ReteooBuilderAdapter;
 import org.drools.retebuilder.nodes.DataStreamNode;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.KnowledgeBaseFactory;
-
-import java.util.UUID;
 
 public class CanonicalKieBase extends KnowledgeBaseImpl {
 
@@ -55,7 +55,7 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
         epn.attach();
         this.reteBuilder.registerEntryPoint(EntryPointId.DEFAULT, epn);
 
-        BuildContext context = new BuildContext( this, reteooBuilder.getIdGenerator() );
+        BuildContext context = new BuildContext( this );
         context.setCurrentEntryPoint( epn.getEntryPoint() );
         context.setTupleMemoryEnabled( true );
         context.setObjectTypeNodeMemoryEnabled( true );
@@ -77,6 +77,12 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
     @Override
     public int getNodeCount() {
         return this.reteBuilder.getIdGenerator().getLastId() + 1;
+    }
+
+    @Override
+    public int getMemoryCount(String topic) {
+        // may start in 0
+        return this.reteBuilder.getIdGenerator().getLastId(topic) + 1;
     }
 
     @Override

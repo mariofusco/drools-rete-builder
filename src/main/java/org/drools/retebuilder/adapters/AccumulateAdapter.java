@@ -4,6 +4,7 @@ import org.drools.core.WorkingMemory;
 import org.drools.core.common.InternalFactHandle;
 import org.drools.core.rule.Declaration;
 import org.drools.core.rule.MultiAccumulate;
+import org.drools.core.rule.Pattern;
 import org.drools.core.spi.Accumulator;
 import org.drools.core.spi.Tuple;
 
@@ -11,7 +12,7 @@ public class AccumulateAdapter extends MultiAccumulate {
 
     public AccumulateAdapter(Accumulator[] accumulators) {
 
-        super(null, new Declaration[0], accumulators);
+        super( new Pattern(), new Declaration[0], accumulators );
     }
 
     @Override

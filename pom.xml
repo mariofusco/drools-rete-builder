@@ -6,7 +6,7 @@
 
   <groupId>org.drools</groupId>
   <artifactId>drools-rete-builder</artifactId>
-  <version>7.0.0-SNAPSHOT</version>
+  <version>7.1.0-SNAPSHOT</version>
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -17,12 +17,12 @@
     <dependency>
       <groupId>org.drools</groupId>
       <artifactId>drools-core</artifactId>
-      <version>7.0.0-SNAPSHOT</version>
+      <version>7.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.drools</groupId>
       <artifactId>drools-model</artifactId>
-      <version>7.0.0-SNAPSHOT</version>
+      <version>7.1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>

@@ -1,5 +1,11 @@
 package org.drools.retebuilder;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.drools.core.base.ClassObjectType;
 import org.drools.core.common.BaseNode;
 import org.drools.core.common.BetaConstraints;
@@ -46,12 +52,6 @@ import org.drools.retebuilder.constraints.LambdaDataProvider;
 import org.drools.retebuilder.nodes.DataStreamNode;
 import org.drools.retebuilder.nodes.SyncInvokerNode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 public class CanonicalReteBuilder {
 
     private final CanonicalKieBase kieBase;
@@ -65,7 +65,7 @@ public class CanonicalReteBuilder {
 
     public CanonicalReteBuilder(CanonicalKieBase kieBase) {
         this.kieBase = kieBase;
-        this.idGenerator = new ReteooBuilder.IdGenerator( 1 );
+        this.idGenerator = new ReteooBuilder.IdGenerator( );
     }
 
     public ReteooBuilder.IdGenerator getIdGenerator() {
@@ -77,7 +77,7 @@ public class CanonicalReteBuilder {
     }
 
     public void addRule(Rule rule) {
-        CanonicalBuildContext context = new CanonicalBuildContext(kieBase, idGenerator);
+        CanonicalBuildContext context = new CanonicalBuildContext(kieBase);
         buildCondition(rule.getView(), context);
         buildConsequence(rule, context);
     }

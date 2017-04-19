@@ -1,5 +1,8 @@
 package org.drools.retebuilder.constraints;
 
+import java.util.Arrays;
+import java.util.Iterator;
+
 import org.drools.core.common.InternalWorkingMemory;
 import org.drools.core.rule.Declaration;
 import org.drools.core.spi.DataProvider;
@@ -8,9 +11,6 @@ import org.drools.core.spi.Tuple;
 import org.drools.model.InvokerMultiValuePattern;
 import org.drools.model.InvokerPattern;
 import org.drools.model.InvokerSingleValuePattern;
-
-import java.util.Arrays;
-import java.util.Iterator;
 
 import static org.drools.retebuilder.constraints.EvaluationUtil.findArgsPos;
 import static org.drools.retebuilder.constraints.EvaluationUtil.getInvocationArgs;
@@ -52,4 +52,9 @@ public class LambdaDataProvider<T> implements DataProvider {
 
     @Override
     public void replaceDeclaration(Declaration declaration, Declaration resolved) { }
+
+    @Override
+    public boolean isReactive() {
+        return false;
+    }
 }

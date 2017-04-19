@@ -1,5 +1,7 @@
 package org.drools.retebuilder.nodes;
 
+import java.util.UUID;
+
 import org.drools.core.common.InternalFactHandle;
 import org.drools.core.common.InternalWorkingMemory;
 import org.drools.core.common.ObjectTypeConfigurationRegistry;
@@ -19,8 +21,6 @@ import org.drools.datasource.Observable;
 import org.drools.model.DataSourceDefinition;
 import org.kie.api.definition.rule.Rule;
 import org.kie.api.runtime.KieSession;
-
-import java.util.UUID;
 
 public class DataStreamNode extends ObjectTypeNode {
 
@@ -106,7 +106,7 @@ public class DataStreamNode extends ObjectTypeNode {
 
 
             final PropagationContext pctx = this.pctxFactory.createPropagationContext(workingMemory.getNextPropagationIdCounter(),
-                                                                                      PropagationContext.INSERTION,
+                                                                                      PropagationContext.Type.INSERTION,
                                                                                       null, // rule,
                                                                                       null, // activation.getTuple(),
                                                                                       factHandle,
