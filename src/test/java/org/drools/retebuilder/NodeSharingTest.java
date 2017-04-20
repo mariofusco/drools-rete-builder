@@ -59,12 +59,11 @@ public class NodeSharingTest {
 
     @Test
     public void testFlowNodeSharing() {
-        Variable<Person> markV = bind(typeOf(Person.class));
-        Variable<Person> olderV = bind(typeOf(Person.class));
+        Variable<Person> markV = any(Person.class);
+        Variable<Person> olderV = any(Person.class);
 
         Rule r1 = rule("alpha")
                 .view(
-                        input(markV),
                         expr(markV, mark -> mark.getName().equals("Mark"))
                      )
                 .then(
@@ -74,8 +73,6 @@ public class NodeSharingTest {
 
         Rule r2 = rule("beta")
                 .view(
-                        input(markV),
-                        input(olderV),
                         expr(markV, mark -> mark.getName().equals("Mark")),
                         expr(olderV, markV, (older, mark) -> older.getAge() > mark.getAge())
                      )

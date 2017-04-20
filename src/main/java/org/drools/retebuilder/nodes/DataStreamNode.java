@@ -16,9 +16,9 @@ import org.drools.core.spi.FactHandleFactory;
 import org.drools.core.spi.ObjectType;
 import org.drools.core.spi.PropagationContext;
 import org.drools.core.util.Bag;
-import org.drools.datasource.DataSourceObserver;
-import org.drools.datasource.Observable;
 import org.drools.model.DataSourceDefinition;
+import org.drools.model.datasources.DataSourceObserver;
+import org.drools.model.datasources.Observable;
 import org.kie.api.definition.rule.Rule;
 import org.kie.api.runtime.KieSession;
 
@@ -58,7 +58,7 @@ public class DataStreamNode extends ObjectTypeNode {
         return this.objectType.equals(other.objectType);
     }
 
-    public void registerDataStreamObserver(KieSession kieSession, Observable observable) {
+    public void registerDataStreamObserver(KieSession kieSession, Observable observable ) {
         new DataStreamObserver((InternalWorkingMemory)kieSession, this, observable);
     }
 

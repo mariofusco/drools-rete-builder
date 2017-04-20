@@ -16,8 +16,8 @@
 
 package org.drools.retebuilder.rxjava;
 
-import org.drools.datasource.ReactiveDataSource;
-import org.drools.datasource.impl.AbstractObservable;
+import org.drools.model.datasources.ReactiveDataSource;
+import org.drools.model.datasources.impl.AbstractObservable;
 import org.kie.api.runtime.KieSession;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;

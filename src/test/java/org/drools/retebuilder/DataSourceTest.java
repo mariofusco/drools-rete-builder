@@ -1,13 +1,13 @@
 package org.drools.retebuilder;
 
-import org.drools.datasource.DataStore;
-import org.drools.datasource.DataStream;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.drools.model.Rule;
 import org.drools.model.Variable;
+import org.drools.model.datasources.DataStore;
+import org.drools.model.datasources.DataStream;
 import org.junit.Test;
 import org.kie.api.runtime.KieSession;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.drools.model.DSL.*;
 import static org.drools.retebuilder.DataSourceBinder.bindDataSource;
@@ -68,9 +68,9 @@ public class DataSourceTest {
 
         KieSession ksession = kieBase.newKieSession();
 
-        DataStore persons = storeOf(new Person("Mark", 37),
-                                    new Person("Edson", 35),
-                                    new Person("Mario", 40));
+        DataStore persons = storeOf( new Person( "Mark", 37),
+                                     new Person("Edson", 35),
+                                     new Person("Mario", 40) );
         bindDataSource(ksession, "persons", persons);
 
         ksession.fireAllRules();

@@ -53,9 +53,9 @@ public class FlowTest {
 
         Rule rule = rule("beta")
                 .view(
-                        expr(markV, mark -> mark.getName().equals("Mark")),
-                        expr(olderV, older -> !older.getName().equals("Mark")),
-                        expr(olderV, markV, (older, mark) -> older.getAge() > mark.getAge())
+                        expr(markV, p -> p.getName().equals("Mark")),
+                        expr(olderV, p -> !p.getName().equals("Mark")),
+                        expr(olderV, markV, (p1, p2) -> p1.getAge() > p2.getAge())
                     )
                 .then(c -> c.on(olderV, markV)
                            .execute((p1, p2) -> result.value = p1.getName() + " is older than " + p2.getName()));

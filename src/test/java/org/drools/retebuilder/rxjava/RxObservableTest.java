@@ -1,8 +1,8 @@
 package org.drools.retebuilder.rxjava;
 
-import org.drools.datasource.DataStore;
 import org.drools.model.Rule;
 import org.drools.model.Variable;
+import org.drools.model.datasources.DataStore;
 import org.drools.retebuilder.CanonicalKieBase;
 import org.drools.retebuilder.Person;
 import org.junit.Test;
@@ -45,9 +45,9 @@ public class RxObservableTest {
 
         final KieSession ksession = kieBase.newKieSession();
 
-        DataStore persons = storeOf(new Person("Mark", 37, "London"),
-                                    new Person("Edson", 35, "Toronto"),
-                                    new Person("Mario", 40, "Milano"));
+        DataStore persons = storeOf( new Person( "Mark", 37, "London"),
+                                     new Person("Edson", 35, "Toronto"),
+                                     new Person("Mario", 40, "Milano") );
         bindDataSource(ksession, "persons", persons);
 
         Observable<TempInfo> tempFeed = TempServer.getFeeds( "Milano", "London", "Toronto" );
