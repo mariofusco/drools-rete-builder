@@ -1,12 +1,12 @@
 package org.drools.retebuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.drools.model.Rule;
 import org.drools.model.Variable;
 import org.junit.Test;
 import org.kie.api.runtime.KieSession;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.drools.model.DSL.*;
@@ -25,7 +25,6 @@ public class FlowTest {
 
         Rule rule = rule("alpha")
                 .view(
-                        input(markV),
                         expr(markV, mark -> mark.getName().equals("Mark"))
                     )
                 .then(c -> c.on(markV)
@@ -54,8 +53,6 @@ public class FlowTest {
 
         Rule rule = rule("beta")
                 .view(
-                        input(markV),
-                        input(olderV),
                         expr(markV, mark -> mark.getName().equals("Mark")),
                         expr(olderV, older -> !older.getName().equals("Mark")),
                         expr(olderV, markV, (older, mark) -> older.getAge() > mark.getAge())
@@ -86,8 +83,6 @@ public class FlowTest {
 
         Rule rule = rule("not")
                 .view(
-                        input(oldestV),
-                        input(otherV),
                         not(otherV, oldestV, (p1, p2) -> p1.getAge() > p2.getAge())
                     )
                 .then(c -> c.on(oldestV)
@@ -116,7 +111,6 @@ public class FlowTest {
 
         Rule rule = rule("accumulate")
                 .view(
-                        input(person),
                         accumulate(expr(person, p -> p.getName().startsWith("M")),
                                    sum(Person::getAge).as(resultSum),
                                    avg(Person::getAge).as(resultAvg))
