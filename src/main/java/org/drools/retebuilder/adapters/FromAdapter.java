@@ -17,11 +17,8 @@ public class FromAdapter extends From {
 
     private static class ResultPattern extends Pattern {
 
-        private InvokerPattern pattern;
-
         private ResultPattern(InvokerPattern pattern) {
             super(0, new ClassObjectType(pattern.getPatternVariable().getType().asClass()));
-            this.pattern = pattern;
         }
     }
 }

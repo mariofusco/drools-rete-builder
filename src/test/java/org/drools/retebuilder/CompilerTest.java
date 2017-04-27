@@ -119,7 +119,7 @@ public class CompilerTest {
                 "}\n" +
                 "rule R when\n" +
                 "  $p1 : Person(name == \"Mark\")\n" +
-                "  $age : Integer() from findAge($p1)" +
+                "  $age : Integer() in findAge($p1)" +
                 "then\n" +
                 "  System.out.println($age);\n" +
                 "end";

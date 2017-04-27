@@ -93,14 +93,21 @@ public class CanonicalReteBuilder {
     }
 
     private void buildCondition(Condition condition, CanonicalBuildContext context) {
-        if (condition.getType() instanceof Condition.SingleType) {
-            buildPattern((Pattern) condition, context);
-        } else if (condition.getType() instanceof Condition.AndType) {
-            for (Condition subCondition : condition.getSubConditions()) {
-                buildCondition(subCondition, context);
-            }
-        } else if (condition.getType() instanceof Condition.OrType) {
-            // TODO
+        switch (condition.getType()) {
+            case PATTERN:
+                buildPattern((Pattern) condition, context);
+                break;
+            case AND:
+                for (Condition subCondition : condition.getSubConditions()) {
+                    buildCondition(subCondition, context);
+                }
+                break;
+            case OR:
+                // TODO
+                break;
+            case OOPATH:
+                if (true) throw new UnsupportedOperationException();
+                break;
         }
     }
 

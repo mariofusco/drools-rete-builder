@@ -19,8 +19,8 @@ public class DataSourceTest {
     public void testDataStream() {
         AtomicReference<String> result = new AtomicReference<String>();
 
-        Variable<Person> mark = bind(typeOf(Person.class));
-        Variable<Integer> age = bind(typeOf(Integer.class));
+        Variable<Person> mark = variableOf( type( Person.class ) );
+        Variable<Integer> age = variableOf( type( Integer.class ) );
 
         Rule rule = rule("R")
                 .view(
@@ -51,8 +51,8 @@ public class DataSourceTest {
     public void testDataStore() {
         AtomicReference<String> result = new AtomicReference<String>();
 
-        Variable<Person> mark = bind(typeOf(Person.class));
-        Variable<Integer> age = bind(typeOf(Integer.class));
+        Variable<Person> mark = variableOf( type( Person.class ) );
+        Variable<Integer> age = variableOf( type( Integer.class ) );
 
         Rule rule = rule("R")
                 .view(

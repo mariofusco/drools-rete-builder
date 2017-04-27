@@ -15,8 +15,8 @@ public class NodeSharingTest {
 
     @Test
     public void testNodeSharing() {
-        Variable<Person> mark = bind(typeOf(Person.class));
-        Variable<Person> older = bind(typeOf(Person.class));
+        Variable<Person> mark = variableOf( type( Person.class ) );
+        Variable<Person> older = variableOf( type( Person.class ) );
 
         Rule r1 = rule("alpha")
                 .when(

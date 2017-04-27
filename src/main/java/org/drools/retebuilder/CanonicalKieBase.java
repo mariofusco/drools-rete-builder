@@ -102,7 +102,14 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
     public void addRules(Rule... rules) {
         for (Rule rule : rules) {
             reteBuilder.addRule(rule);
+            registerRuleUnit( rule );
         }
+    }
+
+    private void registerRuleUnit(Rule rule) {
+        // TODO
+        // TypeResolver typeResolver = new ClassTypeResolver( Collections.emptySet(), getRootClassLoader(), rule.getPackge() );
+
     }
 
     public NodeFactory getNodeFactory() {

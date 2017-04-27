@@ -21,7 +21,7 @@ public class FlowTest {
     public void testAlpha() {
         Result result = new Result();
 
-        Variable<Person> markV = bind(typeOf(Person.class));
+        Variable<Person> markV = variableOf( type( Person.class ) );
 
         Rule rule = rule("alpha")
                 .view(
@@ -48,8 +48,8 @@ public class FlowTest {
         Result result = new Result();
 
         List<String> list = new ArrayList<>();
-        Variable<Person> markV = bind(typeOf(Person.class));
-        Variable<Person> olderV = bind(typeOf(Person.class));
+        Variable<Person> markV = variableOf( type( Person.class ) );
+        Variable<Person> olderV = variableOf( type( Person.class ) );
 
         Rule rule = rule("beta")
                 .view(
@@ -78,8 +78,8 @@ public class FlowTest {
         Result result = new Result();
 
         List<String> list = new ArrayList<>();
-        Variable<Person> oldestV = bind(typeOf(Person.class));
-        Variable<Person> otherV = bind(typeOf(Person.class));
+        Variable<Person> oldestV = variableOf( type( Person.class ) );
+        Variable<Person> otherV = variableOf( type( Person.class ) );
 
         Rule rule = rule("not")
                 .view(
@@ -105,9 +105,9 @@ public class FlowTest {
     public void testAccumulate() {
         Result result = new Result();
 
-        Variable<Person> person = bind(typeOf(Person.class));
-        Variable<Integer> resultSum = bind(typeOf(Integer.class));
-        Variable<Double> resultAvg = bind(typeOf(Double.class));
+        Variable<Person> person = variableOf( type( Person.class ) );
+        Variable<Integer> resultSum = variableOf( type( Integer.class ) );
+        Variable<Double> resultAvg = variableOf( type( Double.class ) );
 
         Rule rule = rule("accumulate")
                 .view(
@@ -141,8 +141,8 @@ public class FlowTest {
     public void testInlineInvocation() {
         Result result = new Result();
 
-        Variable<Person> mark = bind(typeOf(Person.class));
-        Variable<Integer> age = bind(typeOf(Integer.class));
+        Variable<Person> mark = variableOf( type( Person.class ) );
+        Variable<Integer> age = variableOf( type( Integer.class ) );
 
         Rule rule = rule("SyncInvocation")
                 .view(
@@ -170,8 +170,8 @@ public class FlowTest {
     public void testInlineInvocationIterable() {
         List<String> result = new ArrayList<String>();
 
-        Variable<Person> mario = bind(typeOf(Person.class));
-        Variable<Person> parent = bind(typeOf(Person.class));
+        Variable<Person> mario = variableOf( type( Person.class ) );
+        Variable<Person> parent = variableOf( type( Person.class ) );
 
         Rule rule = rule("SyncInvocation")
                 .view(
