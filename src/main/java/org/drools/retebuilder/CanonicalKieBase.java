@@ -18,6 +18,7 @@ import org.drools.model.Rule;
 import org.drools.retebuilder.adapters.ReteooBuilderAdapter;
 import org.drools.retebuilder.nodes.DataStreamNode;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.rule.RuleUnit;
 import org.kie.internal.KnowledgeBaseFactory;
 
 public class CanonicalKieBase extends KnowledgeBaseImpl {
@@ -107,9 +108,17 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
     }
 
     private void registerRuleUnit(Rule rule) {
-        // TODO
-        // TypeResolver typeResolver = new ClassTypeResolver( Collections.emptySet(), getRootClassLoader(), rule.getPackge() );
-
+        if (rule.getUnit() != null) {
+            String unitName = rule.getPackge() + "." + rule.getUnit();
+            getRuleUnitRegistry().registerRuleUnit( unitName, () -> {
+                try {
+                    String unitClassName = rule.getPackge() + "." + rule.getUnit().replace( '.', '$' );
+                    return (Class<? extends RuleUnit>) Class.forName( unitClassName, true, getRootClassLoader() );
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException( e );
+                }
+            } );
+        }
     }
 
     public NodeFactory getNodeFactory() {
