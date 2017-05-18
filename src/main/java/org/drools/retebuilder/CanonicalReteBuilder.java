@@ -45,12 +45,14 @@ import org.drools.model.Variable;
 import org.drools.retebuilder.adapters.AccumulateAdapter;
 import org.drools.retebuilder.adapters.FromAdapter;
 import org.drools.retebuilder.adapters.RuleImplAdapter;
+import org.drools.retebuilder.adapters.RuleUnitPattern;
 import org.drools.retebuilder.constraints.ConstraintEvaluator;
 import org.drools.retebuilder.constraints.LambdaAccumulator;
 import org.drools.retebuilder.constraints.LambdaConstraint;
 import org.drools.retebuilder.constraints.LambdaDataProvider;
 import org.drools.retebuilder.nodes.DataStreamNode;
 import org.drools.retebuilder.nodes.SyncInvokerNode;
+import org.kie.api.runtime.rule.RuleUnit;
 
 public class CanonicalReteBuilder {
 
@@ -78,8 +80,24 @@ public class CanonicalReteBuilder {
 
     public void addRule(Rule rule) {
         CanonicalBuildContext context = new CanonicalBuildContext(kieBase);
-        buildCondition(rule.getView(), context);
-        buildConsequence(rule, context);
+        registerRuleUnit( rule, context );
+        buildCondition( rule.getView(), context );
+        buildConsequence( rule, context );
+    }
+
+    private void registerRuleUnit(Rule rule, CanonicalBuildContext context) {
+        if (rule.getUnit() != null) {
+            String unitName = rule.getPackge() + "." + rule.getUnit();
+            kieBase.getRuleUnitRegistry().registerRuleUnit( unitName, () -> {
+                try {
+                    String unitClassName = rule.getPackge() + "." + rule.getUnit().replace( '.', '$' );
+                    return (Class<? extends RuleUnit>) Class.forName( unitClassName, true, kieBase.getRootClassLoader() );
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException( e );
+                }
+            } );
+            buildPattern( RuleUnitPattern.INSTANCE, context );
+        }
     }
 
     private void buildConsequence(Rule rule, CanonicalBuildContext context) {
@@ -137,7 +155,7 @@ public class CanonicalReteBuilder {
             }
             context.setObjectSource( dataStreamNode );
         } else {
-            EntryPointNode epn = getEntryPoint(context, pattern, dataSourceDef);
+            EntryPointNode epn = getEntryPoint(context, pattern, dataSourceDef.getName());
             context.setObjectSource( epn );
             context.setCurrentEntryPoint( epn.getEntryPoint() );
             createObjectTypeNode(context, pattern.getPatternVariable().getType().asClass());
@@ -284,16 +302,16 @@ public class CanonicalReteBuilder {
                                                false );
     }
 
-    private EntryPointNode getEntryPoint(CanonicalBuildContext context, Pattern pattern, DataSourceDefinition dataSourceDef) {
-        EntryPointNode epn = entryPoints.get(dataSourceDef.getName());
+    private EntryPointNode getEntryPoint(CanonicalBuildContext context, Pattern pattern, String epName) {
+        EntryPointNode epn = entryPoints.get(epName);
         if (epn == null) {
             epn = kieBase.getNodeFactory().buildEntryPointNode( idGenerator.getNextId(),
                                                                 RuleBasePartitionId.MAIN_PARTITION,
                                                                 kieBase.getConfiguration().isMultithreadEvaluation(),
                                                                 kieBase.getRete(),
-                                                                new EntryPointId(dataSourceDef.getName()) );
+                                                                new EntryPointId(epName) );
             epn.attach();
-            entryPoints.put(dataSourceDef.getName(), epn);
+            entryPoints.put(epName, epn);
         }
         return epn;
     }

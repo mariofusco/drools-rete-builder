@@ -65,6 +65,8 @@ public class RuleUnitTest {
         CanonicalKieBase kbase = new CanonicalKieBase();
         kbase.addRules(rule);
 
+        ReteDumper.dumpRete( kbase );
+
         RuleUnitExecutor executor = RuleUnitExecutor.create().bind( kbase );
 
         executor.newDataSource( "persons",
