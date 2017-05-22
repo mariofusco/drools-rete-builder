@@ -35,6 +35,14 @@ public class BuildFromKJarBenchmark {
     @Param({"true", "false"})
     private boolean useRuleModel;
 
+    public BuildFromKJarBenchmark() { }
+
+    public BuildFromKJarBenchmark(int numberOfRules, int numberOfRulesPerFile, boolean useRuleModel) {
+        this.numberOfRules = numberOfRules;
+        this.numberOfRulesPerFile = numberOfRulesPerFile;
+        this.useRuleModel = useRuleModel;
+    }
+
     private KieServices kieServices;
     private KieRepository kieRepository;
     private ReleaseId releaseId;
@@ -64,7 +72,9 @@ public class BuildFromKJarBenchmark {
                     jarWithKnowledgeFiles.getJarFile());
         }
         kieRepository.addKieModule(zipKieModule);
-        eater.consume(zipKieModule);
+        if (eater != null) {
+            eater.consume( zipKieModule );
+        }
         return kieServices.newKieContainer(releaseId).newKieBase(kieServices.newKieBaseConfiguration());
     }
 }
