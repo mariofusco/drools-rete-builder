@@ -91,6 +91,7 @@ public class KJarTest {
         return bytesToFile( releaseId, kieModule.getBytes(), ".jar" );
     }
 
+
     private KieModuleModel getDefaultKieModuleModel(KieServices ks) {
         KieModuleModel kproj = ks.newKieModuleModel();
         KieBaseModel kieBaseModel1 = kproj.newKieBaseModel( "kbase" ).setDefault( true );
@@ -98,7 +99,6 @@ public class KJarTest {
         return kproj;
 
     }
-
     private String getPom(ReleaseId releaseId) {
         String pom =
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
