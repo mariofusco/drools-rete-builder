@@ -32,7 +32,7 @@ public class BuildFromKJarBenchmark {
     @Param("100")
     private int numberOfRulesPerFile;
 
-    @Param({"true"})
+    @Param({"true", "false"})
     private boolean useRuleModel;
 
     private KieServices kieServices;
