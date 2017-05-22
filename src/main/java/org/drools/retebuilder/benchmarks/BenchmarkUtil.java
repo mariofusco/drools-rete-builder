@@ -176,8 +176,7 @@ public final class BenchmarkUtil {
     }
 
     private static File bytesToFile( final ReleaseId releaseId, final byte[] bytes, final String extension ) {
-//        final File file = new File( System.getProperty( "java.io.tmpdir" ), releaseId.getArtifactId() + "-" + releaseId.getVersion() + extension );
-        final File file = new File( new File("/home/tzimanyi/test/"), releaseId.getArtifactId() + "-" + releaseId.getVersion() + extension );
+        final File file = new File( System.getProperty( "java.io.tmpdir" ), releaseId.getArtifactId() + "-" + releaseId.getVersion() + extension );
         try {
             final FileOutputStream fos = new FileOutputStream( file );
             fos.write( bytes );
