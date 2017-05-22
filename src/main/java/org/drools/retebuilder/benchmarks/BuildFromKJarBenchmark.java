@@ -21,8 +21,8 @@ import org.openjdk.jmh.infra.Blackhole;
 
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
-@Warmup(iterations = 8, time = 10, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 8, time = 5, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 10, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class BuildFromKJarBenchmark {
 
