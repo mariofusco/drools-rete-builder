@@ -42,9 +42,8 @@ import org.kie.api.io.Resource;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 
+import static org.drools.retebuilder.ModelGenerator.generateModel;
 import static org.junit.Assert.assertTrue;
-
-;
 
 public class KJarTest {
 
@@ -80,11 +79,13 @@ public class KJarTest {
         Resource javaResource = ks.getResources().newFileSystemResource( "src/test/java/" + javaSrc );
         kfs.write( "src/main/java/" + javaSrc, javaResource );
 
-//        kfs.write("src/main/resources/rule.drl", getRule());
+        kfs.write("src/main/resources/rule.drl", getRule());
         kfs.write("src/main/java/mymodel/Rules.java", getRuleModelSource());
 
         KieBuilder kieBuilder = ks.newKieBuilder( kfs );
         assertTrue(kieBuilder.buildAll().getResults().getMessages().isEmpty());
+
+        generateModel( kieBuilder );
 
         InternalKieModule kieModule = (InternalKieModule) kieBuilder.getKieModule();
         return bytesToFile( releaseId, kieModule.getBytes(), ".jar" );
@@ -112,15 +113,15 @@ public class KJarTest {
         return pom;
     }
 
-//    private String getRule() {
-//        return "import " + Person.class.getCanonicalName() + ";" +
-//               "rule R when\n" +
-//               "  $p1 : Person(name == \"Mark\")\n" +
-//               "  $p2 : Person(name != \"Mark\", age > $p1.age)\n" +
-//               "then\n" +
-//               "  System.out.println($p2.getName() + \" is older than \" + $p1.getName());\n" +
-//               "end";
-//    }
+    private String getRule() {
+        return "import " + Person.class.getCanonicalName() + ";" +
+               "rule beta when\n" +
+               "  $p1 : Person(name == \"Mark\")\n" +
+               "  $p2 : Person(name != \"Mark\", age > $p1.age)\n" +
+               "then\n" +
+               "  System.out.println($p2.getName() + \" is older than \" + $p1.getName());\n" +
+               "end";
+    }
 
     private File bytesToFile( ReleaseId releaseId, byte[] bytes, String extension ) {
         File file = new File( System.getProperty( "java.io.tmpdir" ), releaseId.getArtifactId() + "-" + releaseId.getVersion() + extension );
