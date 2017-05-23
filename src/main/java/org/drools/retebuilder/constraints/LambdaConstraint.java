@@ -4,11 +4,16 @@ import org.drools.core.common.InternalFactHandle;
 import org.drools.core.common.InternalWorkingMemory;
 import org.drools.core.rule.ContextEntry;
 import org.drools.core.rule.Declaration;
+import org.drools.core.rule.IndexableConstraint;
 import org.drools.core.rule.MutableTypeConstraint;
 import org.drools.core.rule.constraint.MvelConstraint;
+import org.drools.core.spi.FieldValue;
+import org.drools.core.spi.InternalReadAccessor;
 import org.drools.core.spi.Tuple;
+import org.drools.core.util.AbstractHashTable.FieldIndex;
+import org.drools.core.util.index.IndexUtil;
 
-public class LambdaConstraint extends MutableTypeConstraint {
+public class LambdaConstraint extends MutableTypeConstraint implements IndexableConstraint {
 
     private final ConstraintEvaluator evaluator;
 
@@ -54,6 +59,42 @@ public class LambdaConstraint extends MutableTypeConstraint {
     @Override
     public ContextEntry createContextEntry() {
         return new LambdaContextEntry();
+    }
+
+    @Override
+    public boolean isUnification() {
+        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.isUnification -> TODO" );
+
+    }
+
+    @Override
+    public boolean isIndexable( short nodeType ) {
+        return false;
+//        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.isIndexable -> TODO" );
+    }
+
+    @Override
+    public IndexUtil.ConstraintType getConstraintType() {
+        return IndexUtil.ConstraintType.UNKNOWN;
+//        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.getConstraintType -> TODO" );
+    }
+
+    @Override
+    public FieldValue getField() {
+        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.getField -> TODO" );
+
+    }
+
+    @Override
+    public FieldIndex getFieldIndex() {
+        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.getFieldIndex -> TODO" );
+
+    }
+
+    @Override
+    public InternalReadAccessor getFieldExtractor() {
+        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.getFieldExtractor -> TODO" );
+
     }
 
     public static class LambdaContextEntry extends MvelConstraint.MvelContextEntry {

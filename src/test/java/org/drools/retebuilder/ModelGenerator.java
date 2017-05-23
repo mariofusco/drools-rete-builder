@@ -29,6 +29,7 @@ import org.drools.core.rule.GroupElement;
 import org.drools.core.rule.Pattern;
 import org.drools.core.rule.RuleConditionElement;
 import org.drools.core.rule.constraint.ConditionAnalyzer;
+import org.drools.core.rule.constraint.ConditionAnalyzer.SingleCondition;
 import org.drools.core.rule.constraint.MvelConstraint;
 import org.drools.core.spi.Constraint;
 import org.kie.api.builder.KieBuilder;
@@ -94,19 +95,24 @@ public class ModelGenerator {
 
             ExecutableStatement statement = (ExecutableStatement)MVEL.compileExpression( mvelConstraint.getExpression(), parserContext );
             try {
-                System.out.println( statement.getValue( patternType.newInstance(), new MapVariableResolverFactory( variables ) ) );
+                statement.getValue( patternType.newInstance(), new MapVariableResolverFactory( variables ) );
             } catch (Exception e) {
                 throw new RuntimeException( e );
             }
-//            System.out.println( statement.getValue( patternType, null ) );
             ConditionAnalyzer.Condition condition = new ConditionAnalyzer( statement, mvelConstraint.getRequiredDeclarations(), new EvaluatorWrapper[0], patternType.getCanonicalName()).analyzeCondition();
             System.out.println(condition);
+            context.expressions.put( pattern.getDeclaration().getBindingName(), conditionToLambda(condition) );
         }
     }
 
-    // expr(markV, p -> p.getName().equals("Mark"))
+    private static String conditionToLambda(ConditionAnalyzer.Condition condition) {
+        SingleCondition singleCondition = ( (SingleCondition) condition );
+        singleCondition.getLeft();
+        return "_1 -> _1.getName().equals(\"Mark\")";
+    }
 
     public static class RuleContext {
         Map<String, Class<?>> declarations = new HashMap<>();
+        Map<String, String> expressions = new HashMap<>();
     }
 }

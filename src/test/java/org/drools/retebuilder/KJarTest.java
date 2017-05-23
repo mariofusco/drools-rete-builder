@@ -54,16 +54,22 @@ public class KJarTest {
 
         File jarFile = createJarFile(ks, releaseId);
 
+        executeSession( ks, releaseId );
+
         KieRepository repo = ks.getRepository();
         repo.removeKieModule( releaseId );
 
         KieModule zipKieModule = new CanonicalKieModule( releaseId, getDefaultKieModuleModel( ks ), jarFile );
         repo.addKieModule( zipKieModule );
 
+        executeSession( ks, releaseId );
+    }
+
+    private void executeSession( KieServices ks, ReleaseId releaseId ) {
         KieContainer kieContainer = ks.newKieContainer( releaseId );
         KieSession kieSession = kieContainer.newKieSession();
 
-        kieSession.insert(new Person("Mark", 37));
+        kieSession.insert(new Person( "Mark", 37) );
         kieSession.insert(new Person("Edson", 35));
         kieSession.insert(new Person("Mario", 40));
         kieSession.fireAllRules();
