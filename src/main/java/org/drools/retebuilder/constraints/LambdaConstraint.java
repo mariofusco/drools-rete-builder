@@ -69,8 +69,7 @@ public class LambdaConstraint extends MutableTypeConstraint implements Indexable
 
     @Override
     public boolean isIndexable( short nodeType ) {
-        return false;
-//        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.isIndexable -> TODO" );
+        return getConstraintType().isIndexableForNode(nodeType);
     }
 
     @Override

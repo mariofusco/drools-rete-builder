@@ -195,6 +195,7 @@ public class KJarTest {
                "import org.drools.model.*;\n" +
                "import static org.drools.model.DSL.*;\n" +
                "import org.drools.retebuilder.Person;\n" +
+               "import org.drools.model.Index.ConstraintType;\n" +
                "" +
                "public class Rules implements Model {\n" +
                "" +
@@ -208,7 +209,7 @@ public class KJarTest {
                "        Variable<Person> olderV = variableOf( type( Person.class ) );\n" +
                "        Rule rule = rule( \"beta\" )\n" +
                "                .view(\n" +
-               "                        expr(markV, p -> p.getName().equals(\"Mark\")),\n" +
+               "                        expr(markV, p -> p.getName().equals(\"Mark\")).indexedBy( ConstraintType.EQUAL, Person::getName, \"Mark\" ),\n" +
                "                        expr(olderV, p -> !p.getName().equals(\"Mark\")),\n" +
                "                        expr(olderV, markV, (p1, p2) -> p1.getAge() > p2.getAge())\n" +
                "                     )\n" +

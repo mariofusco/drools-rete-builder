@@ -3,6 +3,7 @@ package org.drools.retebuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.drools.model.Index.ConstraintType;
 import org.drools.model.Rule;
 import org.drools.model.Variable;
 import org.junit.Test;
@@ -53,7 +54,7 @@ public class FlowTest {
 
         Rule rule = rule("beta")
                 .view(
-                        expr(markV, p -> p.getName().equals("Mark")),
+                        expr(markV, p -> p.getName().equals("Mark")).indexedBy( ConstraintType.EQUAL, Person::getName, "Mark" ),
                         expr(olderV, p -> !p.getName().equals("Mark")),
                         expr(olderV, markV, (p1, p2) -> p1.getAge() > p2.getAge())
                     )
