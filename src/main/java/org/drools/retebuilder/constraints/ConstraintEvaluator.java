@@ -2,6 +2,7 @@ package org.drools.retebuilder.constraints;
 
 import org.drools.core.common.InternalFactHandle;
 import org.drools.core.spi.Tuple;
+import org.drools.model.Index;
 import org.drools.model.Pattern;
 import org.drools.model.SingleConstraint;
 import org.drools.model.functions.PredicateN;
@@ -13,11 +14,15 @@ public class ConstraintEvaluator {
 
     private final String id;
     private final PredicateN predicate;
+    private final Index index;
+    private final String[] reactiveProps;
     private final int[] argsPos;
 
     public ConstraintEvaluator(Pattern pattern, SingleConstraint constraint) {
         this.id = constraint.getExprId();
         this.predicate = constraint.getPredicate();
+        this.index = constraint.getIndex();
+        this.reactiveProps = constraint.getReactiveProps();
         this.argsPos = findArgsPos(pattern, constraint.getVariables());
     }
 
@@ -27,6 +32,10 @@ public class ConstraintEvaluator {
 
     public boolean evaluate(InternalFactHandle handle, Tuple tuple) {
         return predicate.test(getInvocationArgs(argsPos, handle, tuple));
+    }
+
+    public Index getIndex() {
+        return index;
     }
 
     @Override

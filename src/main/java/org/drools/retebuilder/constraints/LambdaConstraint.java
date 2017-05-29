@@ -1,5 +1,6 @@
 package org.drools.retebuilder.constraints;
 
+import org.drools.core.base.field.ObjectFieldImpl;
 import org.drools.core.common.InternalFactHandle;
 import org.drools.core.common.InternalWorkingMemory;
 import org.drools.core.rule.ContextEntry;
@@ -12,18 +13,38 @@ import org.drools.core.spi.InternalReadAccessor;
 import org.drools.core.spi.Tuple;
 import org.drools.core.util.AbstractHashTable.FieldIndex;
 import org.drools.core.util.index.IndexUtil;
+import org.drools.model.AlphaIndex;
+import org.drools.model.Index;
 
 public class LambdaConstraint extends MutableTypeConstraint implements IndexableConstraint {
 
     private final ConstraintEvaluator evaluator;
+    private final Declaration[] requiredDeclarations;
+
+    private FieldValue field;
+    private InternalReadAccessor readAccessor;
 
     public LambdaConstraint(ConstraintEvaluator evaluator) {
+        this(evaluator, new Declaration[0]);
+    }
+
+    public LambdaConstraint(ConstraintEvaluator evaluator, Declaration[] requiredDeclarations) {
         this.evaluator = evaluator;
+        this.requiredDeclarations = requiredDeclarations;
+        initIndexes();
+    }
+
+    private void initIndexes() {
+        Index index = evaluator.getIndex();
+        if (index instanceof AlphaIndex ) {
+            field = new ObjectFieldImpl( ( (AlphaIndex) index ).getRightValue() );
+            readAccessor = new LambdaReadAccessor( ( (AlphaIndex) index ).getLeftOperandExtractor() );
+        }
     }
 
     @Override
     public Declaration[] getRequiredDeclarations() {
-        throw new UnsupportedOperationException("org.drools.retebuilder.constraints.LambdaConstraint.getRequiredDeclarations -> TODO");
+        return requiredDeclarations;
     }
 
     @Override
@@ -74,14 +95,31 @@ public class LambdaConstraint extends MutableTypeConstraint implements Indexable
 
     @Override
     public IndexUtil.ConstraintType getConstraintType() {
+        Index index = evaluator.getIndex();
+        if (index != null) {
+            switch (index.getConstraintType()) {
+                case EQUAL:
+                    return IndexUtil.ConstraintType.EQUAL;
+                case NOT_EQUAL:
+                    return IndexUtil.ConstraintType.NOT_EQUAL;
+                case GREATER_THAN:
+                    return IndexUtil.ConstraintType.GREATER_THAN;
+                case GREATER_OR_EQUAL:
+                    return IndexUtil.ConstraintType.GREATER_OR_EQUAL;
+                case LESS_THAN:
+                    return IndexUtil.ConstraintType.LESS_THAN;
+                case LESS_OR_EQUAL:
+                    return IndexUtil.ConstraintType.LESS_OR_EQUAL;
+                case RANGE:
+                    return IndexUtil.ConstraintType.RANGE;
+            }
+        }
         return IndexUtil.ConstraintType.UNKNOWN;
-//        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.getConstraintType -> TODO" );
     }
 
     @Override
     public FieldValue getField() {
-        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.getField -> TODO" );
-
+        return field;
     }
 
     @Override
@@ -92,8 +130,7 @@ public class LambdaConstraint extends MutableTypeConstraint implements Indexable
 
     @Override
     public InternalReadAccessor getFieldExtractor() {
-        throw new UnsupportedOperationException( "org.drools.retebuilder.constraints.LambdaConstraint.getFieldExtractor -> TODO" );
-
+        return readAccessor;
     }
 
     public static class LambdaContextEntry extends MvelConstraint.MvelContextEntry {
