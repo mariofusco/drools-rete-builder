@@ -18,8 +18,8 @@ import org.drools.core.rule.EntryPointId;
 import org.drools.model.Rule;
 import org.drools.retebuilder.adapters.ReteooBuilderAdapter;
 import org.drools.retebuilder.nodes.DataStreamNode;
+import org.kie.api.KieServices;
 import org.kie.api.runtime.KieSession;
-import org.kie.internal.KnowledgeBaseFactory;
 
 public class CanonicalKieBase extends KnowledgeBaseImpl {
 
@@ -32,7 +32,7 @@ public class CanonicalKieBase extends KnowledgeBaseImpl {
 
     public CanonicalKieBase() {
         this(UUID.randomUUID().toString(),
-             (RuleBaseConfiguration) KnowledgeBaseFactory.newKnowledgeBaseConfiguration());
+             (RuleBaseConfiguration) KieServices.get().newKieBaseConfiguration() );
     }
 
     public CanonicalKieBase(String id,

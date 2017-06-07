@@ -33,7 +33,7 @@ import org.drools.core.rule.constraint.ConditionAnalyzer.SingleCondition;
 import org.drools.core.rule.constraint.MvelConstraint;
 import org.drools.core.spi.Constraint;
 import org.kie.api.builder.KieBuilder;
-import org.kie.internal.definition.KnowledgePackage;
+import org.kie.api.definition.KiePackage;
 import org.mvel2.MVEL;
 import org.mvel2.ParserContext;
 import org.mvel2.compiler.ExecutableStatement;
@@ -42,8 +42,8 @@ import org.mvel2.integration.impl.MapVariableResolverFactory;
 public class ModelGenerator {
 
     public static void generateModel( KieBuilder kieBuilder ) {
-        Collection<KnowledgePackage> pkgs = ( (MemoryKieModule) kieBuilder.getKieModule() ).getKnowledgePackagesForKieBase( "kbase" );
-        for ( KnowledgePackage pkg : pkgs ) {
+        Collection<KiePackage> pkgs = ( (MemoryKieModule) kieBuilder.getKieModule() ).getKnowledgePackagesForKieBase( "kbase" );
+        for ( KiePackage pkg : pkgs ) {
             for ( org.kie.api.definition.rule.Rule rule : pkg.getRules() ) {
                 RuleContext context = new RuleContext();
                 GroupElement lhs = ( (RuleImpl) rule ).getLhs();

@@ -1,5 +1,9 @@
 package org.drools.retebuilder;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.drools.core.common.BaseNode;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.reteoo.EntryPointNode;
@@ -8,19 +12,15 @@ import org.drools.core.reteoo.ObjectSource;
 import org.drools.core.reteoo.ObjectTypeNode;
 import org.drools.core.reteoo.Rete;
 import org.drools.core.reteoo.Sink;
+import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
-import org.kie.internal.KnowledgeBase;
 import org.kie.internal.runtime.KnowledgeRuntime;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 public class ReteDumper {
 
     private ReteDumper() { }
 
-    public static void dumpRete(KnowledgeBase kbase ) {
+    public static void dumpRete(KieBase kbase ) {
         dumpRete((InternalKnowledgeBase) kbase);
     }
 
