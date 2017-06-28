@@ -6,7 +6,8 @@ import java.util.Map;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.reteoo.builder.BuildContext;
 import org.drools.model.AccumulatePattern;
-import org.drools.model.ExistentialPattern;
+import org.drools.model.Condition;
+import org.drools.model.Condition.Type;
 import org.drools.model.Pattern;
 import org.drools.model.Variable;
 
@@ -19,8 +20,8 @@ public class CanonicalBuildContext extends BuildContext {
         super(kBase);
     }
 
-    public void addBoundVariables(Pattern pattern) {
-        if (patternCounter == 0 && requiresInitialfact(pattern)) {
+    public void addBoundVariables( Condition.Type type, Pattern pattern ) {
+        if (patternCounter == 0 && requiresInitialfact(type, pattern)) {
             patternCounter++;
         }
         Variable[] vars = pattern.getBoundVariables();
@@ -36,8 +37,8 @@ public class CanonicalBuildContext extends BuildContext {
         return boundVariables.get(variable);
     }
 
-    private boolean requiresInitialfact(Pattern pattern) {
-        return pattern instanceof AccumulatePattern || pattern instanceof ExistentialPattern;
+    private boolean requiresInitialfact(Condition.Type type, Pattern pattern) {
+        return pattern instanceof AccumulatePattern || type == Type.EXISTS || type == Type.NOT;
     }
 
     private static class ArgumentExtractor implements ArgumentMapper {

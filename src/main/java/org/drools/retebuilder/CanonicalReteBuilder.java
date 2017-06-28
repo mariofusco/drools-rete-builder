@@ -34,9 +34,9 @@ import org.drools.core.spi.DataProvider;
 import org.drools.core.spi.ObjectType;
 import org.drools.model.AccumulatePattern;
 import org.drools.model.Condition;
+import org.drools.model.Condition.Type;
 import org.drools.model.Constraint;
 import org.drools.model.DataSourceDefinition;
-import org.drools.model.ExistentialPattern;
 import org.drools.model.InvokerPattern;
 import org.drools.model.Pattern;
 import org.drools.model.Rule;
@@ -96,7 +96,7 @@ public class CanonicalReteBuilder {
                     throw new RuntimeException( e );
                 }
             } );
-            buildPattern( RuleUnitPattern.INSTANCE, context );
+            buildPattern( Type.PATTERN, RuleUnitPattern.INSTANCE, context );
         }
     }
 
@@ -113,7 +113,11 @@ public class CanonicalReteBuilder {
     private void buildCondition(Condition condition, CanonicalBuildContext context) {
         switch (condition.getType()) {
             case PATTERN:
-                buildPattern((Pattern) condition, context);
+                buildPattern( Type.PATTERN, (Pattern) condition, context);
+                break;
+            case NOT:
+            case EXISTS:
+                buildPattern(condition.getType(), (Pattern)condition.getSubConditions().get(0), context);
                 break;
             case AND:
                 for (Condition subCondition : condition.getSubConditions()) {
@@ -129,16 +133,16 @@ public class CanonicalReteBuilder {
         }
     }
 
-    private void buildPattern(Pattern pattern, CanonicalBuildContext context) {
-        initPattern(pattern, context);
-        buildConstraints(pattern, context);
+    private void buildPattern(Condition.Type type, Pattern pattern, CanonicalBuildContext context) {
+        initPattern(type, pattern, context);
+        buildConstraints(type, pattern, context);
         context.incrementCurrentPatternOffset();
         createLeftInputAdapterNode(context);
     }
 
-    private void initPattern(Pattern<?> pattern, CanonicalBuildContext context) {
+    private void initPattern(Condition.Type type, Pattern<?> pattern, CanonicalBuildContext context) {
         if (context.getTupleSource() == null &&
-            (pattern instanceof AccumulatePattern || pattern instanceof ExistentialPattern)) {
+            (pattern instanceof AccumulatePattern || type == Type.EXISTS || type == Type.NOT)) {
             createObjectTypeNode(context, InitialFactImpl.class);
             createLeftInputAdapterNode(context);
         }
@@ -161,20 +165,20 @@ public class CanonicalReteBuilder {
             createObjectTypeNode(context, pattern.getPatternVariable().getType().asClass());
         }
 
-        context.addBoundVariables(pattern);
+        context.addBoundVariables(type, pattern);
     }
 
-    private void buildConstraints(Pattern pattern, CanonicalBuildContext context) {
+    private void buildConstraints(Condition.Type type, Pattern pattern, CanonicalBuildContext context) {
         if (pattern instanceof InvokerPattern) {
             buildInvoker((InvokerPattern)pattern, context);
             return;
         }
-        buildConstraint(pattern, pattern.getConstraint(), context);
+        buildConstraint(type, pattern, pattern.getConstraint(), context);
         if (pattern instanceof AccumulatePattern) {
             buildAccumulate((AccumulatePattern) pattern, context);
         }
         if (context.getObjectSource() != null && context.getTupleSource() != null) {
-            buildBetaConstraint(pattern, null, context);
+            buildBetaConstraint(type, pattern, null, context);
         }
     }
 
@@ -185,7 +189,7 @@ public class CanonicalReteBuilder {
         attachBetaNode(context, node);
     }
 
-    private void buildConstraint(Pattern pattern, Constraint constraint, CanonicalBuildContext context) {
+    private void buildConstraint(Condition.Type type, Pattern pattern, Constraint constraint, CanonicalBuildContext context) {
         if (constraint.getType() == Constraint.Type.SINGLE) {
             SingleConstraint singleConstraint = (SingleConstraint) constraint;
             ConstraintEvaluator constraintEvaluator = new ConstraintEvaluator(pattern, singleConstraint);
@@ -193,12 +197,12 @@ public class CanonicalReteBuilder {
                 if (isAlphaConstraint(pattern, singleConstraint)) {
                     buildAlphaConstraint(pattern, constraintEvaluator, context);
                 } else {
-                    buildBetaConstraint(pattern, constraintEvaluator, context);
+                    buildBetaConstraint(type, pattern, constraintEvaluator, context);
                 }
             }
         } else if (pattern.getConstraint().getType() == Constraint.Type.AND) {
             for (Constraint child : constraint.getChildren()) {
-                buildConstraint(pattern, child, context);
+                buildConstraint(type, pattern, child, context);
             }
         }
     }
@@ -254,33 +258,33 @@ public class CanonicalReteBuilder {
         context.setObjectSource( (ObjectSource) utils.attachNode( context, alpha ) );
     }
 
-    private void buildBetaConstraint(Pattern pattern, ConstraintEvaluator constraintEvaluator, CanonicalBuildContext context) {
+    private void buildBetaConstraint(Condition.Type type, Pattern pattern, ConstraintEvaluator constraintEvaluator, CanonicalBuildContext context) {
         BetaConstraints betaConstraints = buildBetaConstraints(constraintEvaluator, context);
 
         BetaNode beta = null;
-        if (pattern instanceof ExistentialPattern) {
-            switch (((ExistentialPattern)pattern).getExistentialType()) {
-                case EXISTS:
-                    beta = kieBase.getNodeFactory().buildExistsNode(context.getNextId(),
-                                                                    context.getTupleSource(),
-                                                                    context.getObjectSource(),
-                                                                    betaConstraints,
-                                                                    context);
-                    break;
-                case NOT:
-                    beta = kieBase.getNodeFactory().buildNotNode(context.getNextId(),
-                                                                 context.getTupleSource(),
-                                                                 context.getObjectSource(),
-                                                                 betaConstraints,
-                                                                 context);
-                    break;
-            }
-        } else {
-            beta = kieBase.getNodeFactory().buildJoinNode( context.getNextId(),
-                                                           context.getTupleSource(),
-                                                           context.getObjectSource(),
-                                                           betaConstraints,
-                                                           context );
+        switch (type) {
+            case EXISTS:
+                beta = kieBase.getNodeFactory().buildExistsNode(context.getNextId(),
+                                                                context.getTupleSource(),
+                                                                context.getObjectSource(),
+                                                                betaConstraints,
+                                                                context);
+                break;
+
+            case NOT:
+                beta = kieBase.getNodeFactory().buildNotNode(context.getNextId(),
+                                                             context.getTupleSource(),
+                                                             context.getObjectSource(),
+                                                             betaConstraints,
+                                                             context);
+                break;
+
+            default:
+                beta = kieBase.getNodeFactory().buildJoinNode( context.getNextId(),
+                                                               context.getTupleSource(),
+                                                               context.getObjectSource(),
+                                                               betaConstraints,
+                                                               context );
         }
 
         attachBetaNode(context, beta);
