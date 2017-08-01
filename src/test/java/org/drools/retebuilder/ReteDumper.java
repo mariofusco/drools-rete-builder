@@ -13,8 +13,8 @@ import org.drools.core.reteoo.ObjectTypeNode;
 import org.drools.core.reteoo.Rete;
 import org.drools.core.reteoo.Sink;
 import org.kie.api.KieBase;
+import org.kie.api.runtime.KieRuntime;
 import org.kie.api.runtime.KieSession;
-import org.kie.internal.runtime.KnowledgeRuntime;
 
 public class ReteDumper {
 
@@ -24,7 +24,7 @@ public class ReteDumper {
         dumpRete((InternalKnowledgeBase) kbase);
     }
 
-    public static void dumpRete(KnowledgeRuntime session) {
+    public static void dumpRete(KieRuntime session ) {
         dumpRete((InternalKnowledgeBase)session.getKieBase());
     }
 

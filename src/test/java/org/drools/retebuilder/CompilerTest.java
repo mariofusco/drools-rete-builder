@@ -31,7 +31,7 @@ public class CompilerTest {
                 "import " + Person.class.getCanonicalName() + ";" +
                 "rule R when\n" +
                 "  $p1 : Person(name == \"Mark\")\n" +
-                "  $p2 : Person(name != \"Mark\", age > $p1.age)\n" +
+                "  $p2 : Person(name != \"Mark\", age == $p1.age)\n" +
                 "then\n" +
                 "  System.out.println($p2.getName() + \" is older than \" + $p1.getName());\n" +
                 "end";
@@ -40,8 +40,39 @@ public class CompilerTest {
 
         ksession.insert(new Person("Mark", 37));
         ksession.insert(new Person("Edson", 35));
-        ksession.insert(new Person("Mario", 40));
+        ksession.insert(new Person("Mario", 37));
         ksession.fireAllRules();
+    }
+
+    @Test
+    public void testBeta2() {
+        String str =
+                "import " + Bean.class.getCanonicalName() + ";" +
+                "import " + Person.class.getCanonicalName() + ";" +
+                "rule R when\n" +
+                "  $s : Bean( value > 2 )\n" +
+                "  $p : Person(name == \"Mark\", age > $s.value)\n" +
+                "then\n" +
+                "  System.out.println($p.getName() + \" is older than \" + $s);\n" +
+                "end";
+
+        KieSession ksession = getKieSession(str);
+
+        ksession.insert(new Person("Mark", 37));
+        ksession.insert(new Bean(3));
+        ksession.fireAllRules();
+    }
+
+    public static class Bean {
+        private final int value;
+
+        public Bean( int value ) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
 
     @Test
